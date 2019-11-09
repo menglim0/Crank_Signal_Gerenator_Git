@@ -1,0 +1,34 @@
+*** Creating Trace Output File '.\Project\song370.tra' Ok.
+### Preparing for ADS-LD.
+### Creating ADS-LD Command Line
+### List of Objects: adding '".\project\core_cm3.o"'
+### List of Objects: adding '".\project\startup_stm32f10x_hd.o"'
+### List of Objects: adding '".\project\croutine.o"'
+### List of Objects: adding '".\project\list.o"'
+### List of Objects: adding '".\project\queue.o"'
+### List of Objects: adding '".\project\tasks.o"'
+### List of Objects: adding '".\project\timers.o"'
+### List of Objects: adding '".\project\heap_2.o"'
+### List of Objects: adding '".\project\port.o"'
+### List of Objects: adding '".\project\misc.o"'
+### List of Objects: adding '".\project\stm32f10x_gpio.o"'
+### List of Objects: adding '".\project\stm32f10x_rcc.o"'
+### List of Objects: adding '".\project\system_stm32f10x.o"'
+### List of Objects: adding '".\project\stm32f10x_flash.o"'
+### List of Objects: adding '".\project\main.o"'
+### List of Objects: adding '".\project\my_inittask.o"'
+### ADS-LD Command completed:
+--cpu Cortex-M3 ".\project\core_cm3.o" ".\project\startup_stm32f10x_hd.o" ".\project\croutine.o" ".\project\list.o" ".\project\queue.o" ".\project\tasks.o" ".\project\timers.o" ".\project\heap_2.o" ".\project\port.o" ".\project\misc.o" ".\project\stm32f10x_gpio.o" ".\project\stm32f10x_rcc.o" ".\project\system_stm32f10x.o" ".\project\stm32f10x_flash.o" ".\project\main.o" ".\project\my_inittask.o" --strict --scatter ".\Project\song370.sct" 
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\song370.map" -o ".\Project\song370.axf"### Preparing Environment (PrepEnvAds)
+### ADS-LD Output File: '.\Project\song370.axf'
+### ADS-LD Command File: '.\Project\song370.lnp'
+### Checking for dirty Components...
+### Creating CmdFile '.\Project\song370.lnp', Handle=0x0000036C
+### Writing '.lnp' file
+### ADS-LD Command file '.\Project\song370.lnp' is ready.
+### ADS-LD: About to start ADS-LD Thread.
+### ADS-LD: executed with 0 errors
+### Updating obj list
+### LDADS_file() completed.

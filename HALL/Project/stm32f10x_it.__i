@@ -1,0 +1,1 @@
+-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I..\ -I..\FreeRTOS -I.\Lib -I.\Lib\inc -I.\Kernel\include -I.\Kernel\portable -I.\App -I "C:\Keil\ARM\INC" -I "C:\Keil\ARM\INC\ST\STM32F10x" -DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -o ".\Project\stm32f10x_it.o" --omf_browse ".\Project\stm32f10x_it.crf" --depend ".\Project\stm32f10x_it.d" "Lib\stm32f10x_it.c"

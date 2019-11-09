@@ -1,0 +1,7 @@
+-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I .\Libraries -I .\Libraries\inc -I .\FreeRTOS\include -I .\FreeRTOS\portable -I .\User -I .\FreeRTOS
+-I.\RTE\_song370
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
+-IC:\Keil_v5\ARM\CMSIS\Include
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0
+-D__UVISION_VERSION="524" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD
+-o .\project\queue.o --omf_browse .\project\queue.crf --depend .\project\queue.d "FreeRTOS\queue.c"

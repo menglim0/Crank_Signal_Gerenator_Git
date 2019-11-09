@@ -1,0 +1,1 @@
+-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I.\Libraries -I.\Libraries\inc -I.\FreeRTOS\include -I.\FreeRTOS\portable -I.\User -I.\FreeRTOS -I "C:\Keil\ARM\INC" -I "C:\Keil\ARM\INC\ST\STM32F10x" -DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -o ".\Project\mib_structs.o" --omf_browse ".\Project\mib_structs.crf" --depend ".\Project\mib_structs.d" "Lwip1.32\mib_structs.c"

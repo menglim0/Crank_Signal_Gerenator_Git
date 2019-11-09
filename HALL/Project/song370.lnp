@@ -1,0 +1,26 @@
+--cpu Cortex-M3
+".\project\core_cm3.o"
+".\project\startup_stm32f10x_hd.o"
+".\project\croutine.o"
+".\project\list.o"
+".\project\queue.o"
+".\project\tasks.o"
+".\project\timers.o"
+".\project\heap_2.o"
+".\project\port.o"
+".\project\misc.o"
+".\project\stm32f10x_gpio.o"
+".\project\stm32f10x_rcc.o"
+".\project\system_stm32f10x.o"
+".\project\stm32f10x_flash.o"
+".\project\stm32f10x_adc.o"
+".\project\stm32f10x_dma.o"
+".\project\stm32f10x_tim.o"
+".\project\stm32f10x_rtc.o"
+".\project\main.o"
+".\project\my_inittask.o"
+".\project\vios.o"
+--strict --scatter ".\Project\song370.sct"
+--summary_stderr --info summarysizes --map --xref --callgraph --symbols
+--info sizes --info totals --info unused --info veneers
+--list ".\song370.map" -o .\Project\song370.axf

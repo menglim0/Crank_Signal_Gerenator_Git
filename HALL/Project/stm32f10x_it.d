@@ -1,0 +1,13 @@
+.\Project\stm32f10x_it.o: Lib\stm32f10x_it.c
+.\Project\stm32f10x_it.o: Lib\stm32f10x_it.h
+.\Project\stm32f10x_it.o: Lib\stm32f10x.h
+.\Project\stm32f10x_it.o: Lib\core_cm3.h
+.\Project\stm32f10x_it.o: C:\Keil\ARM\RV31\INC\stdint.h
+.\Project\stm32f10x_it.o: Lib\system_stm32f10x.h
+.\Project\stm32f10x_it.o: Lib\stm32f10x_conf.h
+.\Project\stm32f10x_it.o: .\Lib\inc\stm32f10x_gpio.h
+.\Project\stm32f10x_it.o: .\Lib\stm32f10x.h
+.\Project\stm32f10x_it.o: .\Lib\inc\stm32f10x_rcc.h
+.\Project\stm32f10x_it.o: .\Lib\inc\stm32f10x_sdio.h
+.\Project\stm32f10x_it.o: .\Lib\inc\stm32f10x_usart.h
+.\Project\stm32f10x_it.o: .\Lib\inc\misc.h
