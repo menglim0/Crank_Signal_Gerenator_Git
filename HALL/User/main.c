@@ -70,7 +70,7 @@
 #include "vios.h"
 
 
-
+void Freq_Convert(uint16_t AD_Value);
 void Task1 (void *data);
 void Task2 (void *data);
 void Task3 (void *data);
@@ -78,6 +78,9 @@ void Task4 (void *data);
 /*void Task5 (void *data);
 void Task6 (void *data);*/
 
+uint16_t Freq_PreARR[5]={180,1500,2000,2500,3000};
+uint16_t Freq_Prefres[5]={1,2,4,8,16};
+uint16_t Freq_Offset[5]={0,750,660,585,573};
 
 
 
@@ -138,7 +141,10 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 		ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
 		ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
 		
-		Init_TIMER(ADC_SimpleConvertValue[1]);
+			//TIM4->ARR = 60000-1;
+		Freq_Convert(ADC_SimpleConvertValue[1]);
+		
+		//Init_TIMER(ADC_SimpleConvertValue[1]);
 //		CrankPeroid++;
 //		if(CrankPeroid>7200)
 //		{
@@ -147,6 +153,36 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 	}
 	}
 }
+
+void Freq_Convert(uint16_t AD_Value)
+{
+	uint8_t index;
+	uint16_t psc,arr;
+	for(index=1;index<5;index++)
+	{
+		if(AD_Value<Freq_PreARR[index]&&AD_Value>Freq_PreARR[index-1])
+		{
+			psc=Freq_Prefres[index-1];
+			arr=AD_Value-Freq_Offset[index-1];
+			
+		}
+		else if(AD_Value>Freq_PreARR[4])
+		{
+			psc=Freq_Prefres[4];
+			arr=AD_Value-Freq_Offset[4];
+		}
+		else if(AD_Value<Freq_PreARR[0])
+	 {
+			psc=Freq_Prefres[0];
+			arr=Freq_PreARR[0];
+	 }
+		
+	}
+	TIM4->ARR=arr;
+	TIM4->PSC=(psc*8-1);
+
+}
+
 /*
 void Task2 (void *data)
 {
