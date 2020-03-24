@@ -71,6 +71,7 @@
 
 
 void Freq_Convert(uint16_t AD_Value);
+void PWM_Freq_DC(uint16_t freq);
 void Task1 (void *data);
 void Task2 (void *data);
 void Task3 (void *data);
@@ -78,9 +79,10 @@ void Task4 (void *data);
 /*void Task5 (void *data);
 void Task6 (void *data);*/
 
-uint16_t Freq_PreARR[5]={180,1500,2000,2500,3000};
+uint16_t Freq_PreARR[5]={180,1500,2000,2500,2770};
 uint16_t Freq_Prefres[5]={1,2,4,8,16};
 uint16_t Freq_Offset[5]={0,750,660,585,573};
+#define AD_MIN 0
 
 
 
@@ -114,7 +116,7 @@ void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
 	char LoopCnt;
-	uint16_t CrankPeroid=720;
+	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
 	data = data;
 	xLastExecutionTime = xTaskGetTickCount();
 	 
@@ -141,8 +143,52 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 		ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
 		ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
 		
+		if(ADC_SimpleConvertValue[1]>AD_MIN)
+		{
+		AD_Offset_Value=ADC_SimpleConvertValue[1]-AD_MIN;
+		}
+		else
+		{
+			AD_Offset_Value=0;
+		}
 			//TIM4->ARR = 60000-1;
-		Freq_Convert(ADC_SimpleConvertValue[1]);
+		//Freq_Convert(ADC_SimpleConvertValue[1]);
+		
+
+		if(AD_Offset_Value>200)
+		{
+ 		TIM_Cmd(TIM4, ENABLE);
+//			if(AD_Offset_Value<80)
+//			{
+//				freq_input=0;
+//			}
+//			else if(AD_Offset_Value>200)
+//			{
+//				freq_input=AD_Offset_Value-180;
+//			}
+			freq_input=AD_Offset_Value-173;
+			if(freq_input<3000)
+			{
+			PWM_Freq_DC(freq_input*3);
+			}
+			//PWM_Freq_DC(1000);
+	
+		
+		}
+		else 
+		{
+			if(AD_Offset_Value<50)
+			{
+			freq_input=0;
+			TIM_Cmd(TIM4, DISABLE); 
+			}
+			else if(AD_Offset_Value>100)
+			{
+				TIM_Cmd(TIM4, ENABLE);
+			PWM_Freq_DC(80);
+			}
+		}
+				
 		
 		//Init_TIMER(ADC_SimpleConvertValue[1]);
 //		CrankPeroid++;
@@ -158,8 +204,19 @@ void Freq_Convert(uint16_t AD_Value)
 {
 	uint8_t index;
 	uint16_t psc,arr;
+	
+	if(AD_Value>Freq_PreARR[4]+200)
+		{
+			TIM_Cmd(TIM4, DISABLE); 
+		}
+		else if(AD_Value<Freq_PreARR[4]+100)
+		{
+			TIM_Cmd(TIM4, ENABLE); 
+		}
+	
 	for(index=1;index<5;index++)
 	{
+	
 		if(AD_Value<Freq_PreARR[index]&&AD_Value>Freq_PreARR[index-1])
 		{
 			psc=Freq_Prefres[index-1];
@@ -168,7 +225,7 @@ void Freq_Convert(uint16_t AD_Value)
 		}
 		else if(AD_Value>Freq_PreARR[4])
 		{
-			psc=Freq_Prefres[4];
+	    psc=Freq_Prefres[4];
 			arr=AD_Value-Freq_Offset[4];
 		}
 		else if(AD_Value<Freq_PreARR[0])
@@ -180,7 +237,37 @@ void Freq_Convert(uint16_t AD_Value)
 	}
 	TIM4->ARR=arr;
 	TIM4->PSC=(psc*8-1);
+	
+		TIM4->ARR=2300;
+	TIM4->PSC=16*4-1;
+}
 
+void PWM_Freq_DC(uint16_t freq)
+{
+	uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
+	
+	uint32_t arr_peroid_long,arr_peroid_long_temp,arr_temp;
+	
+	arr_peroid_long = 72000000/(freq*6);
+	arr_peroid_long_temp=arr_peroid_long;
+	for(i=0;i<100;i++)
+	{
+		if(arr_peroid_long_temp>65535)
+		{
+			Var_psc++;
+			arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
+		}
+		else
+		{
+		break;
+		}
+	}
+	
+	arr_peroid_long	=arr_peroid_long/	(Var_psc+1);
+	arr_peroid = arr_peroid_long;	
+	
+		TIM4->ARR = arr_peroid;
+		TIM4->PSC =Var_psc;
 }
 
 /*
