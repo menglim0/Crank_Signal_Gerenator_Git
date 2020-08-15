@@ -47,15 +47,19 @@ compiling stm32f10x_dma.c...
 compiling stm32f10x_tim.c...
 compiling stm32f10x_rtc.c...
 compiling main.c...
-User\main.c(117): warning:  #177-D: variable "CrankPeroid"  was declared but never referenced
-        uint16_t CrankPeroid=720;
-User\main.c: 1 warning, 0 errors
+User\main.c(120): warning:  #177-D: variable "CrankPeroid"  was declared but never referenced
+        uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
+User\main.c(268): warning:  #177-D: variable "compare_dutycycle"  was declared but never referenced
+        uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
+User\main.c(270): warning:  #177-D: variable "arr_temp"  was declared but never referenced
+        uint32_t arr_peroid_long,arr_peroid_long_temp,arr_temp;
+User\main.c: 3 warnings, 0 errors
 compiling My_InitTask.c...
 compiling vios.c...
 linking...
-Program Size: Code=14444 RO-data=336 RW-data=216 ZI-data=18728  
+Program Size: Code=14760 RO-data=336 RW-data=216 ZI-data=18728  
 FromELF: creating hex file...
-".\Project\BrakeDetection.axf" - 0 Error(s), 1 Warning(s).
+".\Project\BrakeDetection.axf" - 0 Error(s), 3 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -69,7 +73,7 @@ Package Vendor: Keil
   C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:06
+Build Time Elapsed:  00:00:11
 </pre>
 </body>
 </html>

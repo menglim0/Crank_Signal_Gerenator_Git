@@ -14,12 +14,15 @@ unsigned int AD_value_group[2];
 
 #define CAM_out_Port GPIOA
 #define CAM_out_Pin GPIO_Pin_0
+//#define CAM_out_Pin GPIO_Pin_1
 
 #define Crank_out_Port GPIOA
 #define Crank_out_Pin GPIO_Pin_8
 
 uint16_t CAM_Phase[]={15,19,23,26,45,49,75,79,83,109}; 
-uint16_t CAM_Phase_ofst[]={5,9,35,39,43,69,95,99,103,106}; 
+uint16_t CAM_Phase_ofst[]={7,15,35,39,43,75,95,99,103,106}; 
+
+uint16_t Number_Of_Teeth=58;
 /* Private variables ---------------------------------------------------------*/
 
 
@@ -131,13 +134,18 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;					//定义一个GPIO结构体变量
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
 															//使能各个端口时钟，重要！！！
 	
 			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
+	
+				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1|GPIO_Pin_6; 			//配置LED D5端口挂接到13端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
+  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
 	
 				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
@@ -325,7 +333,6 @@ void Init_PWM(uint16_t Dutyfactor)
 	TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;    
 															//使能输出状态  需要PWM输出才需要这行代码
     TIM_OC2Init(TIM4, &TIM_OCInitStructure);				//根据参数初始化PWM寄存器    
-
 	TIM_OC2PreloadConfig(TIM4,TIM_OCPreload_Enable);	   	//使能 TIMx在 CCR2 上的预装载寄存器
 
     TIM_CtrlPWMOutputs(TIM4,ENABLE);  						//设置TIM4 的PWM 输出为使能  
@@ -347,24 +354,36 @@ void TIM4_IRQHandler(void)   //TIM3中断
         {
         TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
 				timer4_It_Cnt_Raw++;
+					
+					if(timer4_It_Cnt_Raw%360==0)
+					{
+						Number_Of_Teeth=58;
+						GPIO_ResetBits(GPIOB, GPIO_Pin_1);
+					}
+					
 					if(timer4_It_Cnt_Raw>=720)
 					{
 						timer4_It_Cnt_Raw=0;
+					
 					}
 					
 					timer4_It_Cnt=timer4_It_Cnt_Raw%360;
-					if((timer4_It_Cnt<360&timer4_It_Cnt>=348)|(timer4_It_Cnt<360&timer4_It_Cnt>=348))
-					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+					if((timer4_It_Cnt<360&timer4_It_Cnt>=Number_Of_Teeth*6))
+					{
+						GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					else if((timer4_It_Cnt/3)%2==1)
 					{
 					GPIO_SetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					else
-					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+					{
+						GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					
 			//GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
+					
+					
 						if((timer4_It_Cnt_Raw>(CAM_Phase_ofst[0]*6))&&(timer4_It_Cnt_Raw<=(CAM_Phase_ofst[1]*6)))
 						{
 							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);

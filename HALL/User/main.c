@@ -116,6 +116,7 @@ void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
 	char LoopCnt;
+	uint16_t ToothError_Delay;
 	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
 	data = data;
 	xLastExecutionTime = xTaskGetTickCount();
@@ -126,6 +127,26 @@ void Task1 (void *data)
 		LoopCnt++;
 		if(LoopCnt>15)
 		{LoopCnt=0;
+			
+		
+			if(ToothError_Delay>300)
+			{
+				ToothError_Delay=0;
+				Number_Of_Teeth=59;
+				GPIO_SetBits(GPIOB, GPIO_Pin_1);
+			}
+			else if(ToothError_Delay>50)
+			{
+				ToothError_Delay++;	
+				//GPIO_ResetBits(GPIOA, GPIO_Pin_0);	
+			}
+			else
+			{
+				ToothError_Delay++;	
+							
+			}
+	
+			
 if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
     GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  µ„¡¡LED 
 		//vTaskDelay( 1 / portTICK_RATE_MS ); 

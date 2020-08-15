@@ -21,6 +21,8 @@ void SysTick_Configuration(void);
 void Init_TIMER(uint16_t period);
 void Init_PWM(uint16_t Dutyfactor);
 
+
+
 /* Private function prototypes -----------------------------------------------*/
 void ADC_Configuration(void);
 //void RCC_Configuration(void);
@@ -30,7 +32,7 @@ void DMA_Configuration(void);
 
 void AD_ConvertFunction(void);
 
-
+extern uint16_t Number_Of_Teeth;
 
 
 
