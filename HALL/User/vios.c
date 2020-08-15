@@ -2,7 +2,7 @@
 #include "vios.h"
 
 
-u16 ADC_SimpleConvertValue[4];
+u16 ADC_SimpleConvertValue[5];
 
 
 /******AD input Convert The par is ADC_Channel_x***********/

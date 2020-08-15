@@ -5,7 +5,8 @@
 #include "stm32f10x.h"
 	
 
-
+#define Crank_out_Port GPIOA
+#define Crank_out_Pin GPIO_Pin_8
 
 
 

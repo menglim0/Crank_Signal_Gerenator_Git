@@ -1,5 +1,6 @@
 .\project\main.o: User\main.c
 .\project\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
+.\project\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\project\main.o: .\FreeRTOS\include\FreeRTOS.h
 .\project\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stddef.h
 .\project\main.o: .\FreeRTOS\include\projdefs.h

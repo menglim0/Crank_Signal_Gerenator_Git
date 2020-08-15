@@ -2,7 +2,7 @@
 #define __VIOS_H
 
 #include "stm32f10x.h"
-extern u16 ADC_SimpleConvertValue[4];
+extern u16 ADC_SimpleConvertValue[5];
 
 u16 Get_Adc(u8 ch); 
 u16 Get_Adc(u8 ch);

@@ -54,6 +54,7 @@
 
 /* Standard includes. */
 #include <stdio.h>
+#include <stdbool.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -82,7 +83,13 @@ void Task6 (void *data);*/
 uint16_t Freq_PreARR[5]={180,1500,2000,2500,2770};
 uint16_t Freq_Prefres[5]={1,2,4,8,16};
 uint16_t Freq_Offset[5]={0,750,660,585,573};
+
+#define RelayControl 1
+
 #define AD_MIN 0
+
+
+
 
 
 
@@ -118,108 +125,86 @@ void Task1 (void *data)
 	char LoopCnt;
 	uint16_t ToothError_Delay;
 	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
+		uint16_t Relay_Enable_High =1240,Relay_Disable_Low= 992,Relay_Low_Offset=100;
+	uint16_t Relay_Offset_Scaler= 124,Relay_Disable_Offset_Final;
+	 uint16_t ADC_FilterValue[10];
+	uint16_t ADC_FilterValue_index=0,ADC_FilterValue_Final,ADC_FilterValue_Final_Result;
+	uint16_t loop_index,config_Index;
+	bool ADC_FilterFirstComplete=false;
+	
 	data = data;
 	xLastExecutionTime = xTaskGetTickCount();
-	 
+
 	while (1) 
 	{
-		 vTaskDelayUntil( &xLastExecutionTime, 2/ portTICK_RATE_MS );
-		LoopCnt++;
-		if(LoopCnt>15)
-		{LoopCnt=0;
-			
 		
-			if(ToothError_Delay>300)
-			{
-				ToothError_Delay=0;
-				Number_Of_Teeth=59;
-				GPIO_SetBits(GPIOB, GPIO_Pin_1);
-			}
-			else if(ToothError_Delay>50)
-			{
-				ToothError_Delay++;	
-				//GPIO_ResetBits(GPIOA, GPIO_Pin_0);	
-			}
-			else
-			{
-				ToothError_Delay++;	
-							
-			}
+		
 	
+		 vTaskDelayUntil( &xLastExecutionTime, 2/ portTICK_RATE_MS );		
+		
 			
-if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
-    GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  µãÁÁLED 
-		//vTaskDelay( 1 / portTICK_RATE_MS ); 
-		else
-		GPIO_ResetBits(GPIOG,GPIO_Pin_14);            //  Ï¨ÃðLED
-
-		//vTaskDelay( 1 / portTICK_RATE_MS ); 
 		
 		//AD_ConvertFunction();
-		ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_0);
-		//TIM_SetCompare1(TIM4,ADC_SimpleConvertValue[0]>>2);
-		ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_1);
-		//TIM4->ARR =(ADC_SimpleConvertValue[1]-400)<<4;
-		//TIM_SetCompare2(TIM4,(ADC_SimpleConvertValue[1]-400)<<4);
-		ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
-		ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
+		ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_1);
+		ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_2);
+		ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_3);
+		ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_4);
+		ADC_SimpleConvertValue[4]=Get_Adc(ADC_Channel_5);
+		ADC_FilterValue[ADC_FilterValue_index]=ADC_SimpleConvertValue[0];
 		
-		if(ADC_SimpleConvertValue[1]>AD_MIN)
-		{
-		AD_Offset_Value=ADC_SimpleConvertValue[1]-AD_MIN;
-		}
-		else
-		{
-			AD_Offset_Value=0;
-		}
-			//TIM4->ARR = 60000-1;
-		//Freq_Convert(ADC_SimpleConvertValue[1]);
 		
+		Relay_Low_Offset=0;
+		if(ADC_SimpleConvertValue[1]<0x6FF)
+		{
+			Relay_Low_Offset=Relay_Offset_Scaler*1;
+		}
+		if(ADC_SimpleConvertValue[2]<0x6FF)
+		{
+			Relay_Low_Offset=Relay_Offset_Scaler*2;
+		}
+		
+		if(ADC_SimpleConvertValue[3]<0x6FF)
+		{
+			Relay_Low_Offset=Relay_Offset_Scaler*3;
+		}
+		
+		if(ADC_SimpleConvertValue[4]<0x6FF)
+		{
+			Relay_Low_Offset=Relay_Offset_Scaler*4;
+		}
+		
+		ADC_FilterValue_index++;
+		if(ADC_FilterValue_index>=10)
+		{
+		ADC_FilterValue_index=0;
+			ADC_FilterFirstComplete=true;
+		}
+		ADC_FilterValue_Final=0;
+		for(loop_index=0;loop_index<10;loop_index++)
+		{
+			ADC_FilterValue_Final=ADC_FilterValue_Final+ADC_FilterValue[loop_index];
+			
+		}	
+		ADC_FilterValue_Final_Result=ADC_FilterValue_Final/10;
+		
+		
+		if(ADC_FilterFirstComplete==true)
+		{
+				if(((ADC_FilterValue_Final_Result)>Relay_Enable_High-Relay_Low_Offset+100))
+				{
+							GPIO_SetBits(Crank_out_Port, Crank_out_Pin);
+				}
+				else if(((ADC_FilterValue_Final_Result)<Relay_Disable_Low-Relay_Low_Offset+100))
+				{
+							GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+				}
+	   }
 
-		if(AD_Offset_Value>200)
-		{
- 		TIM_Cmd(TIM4, ENABLE);
-//			if(AD_Offset_Value<80)
-//			{
-//				freq_input=0;
-//			}
-//			else if(AD_Offset_Value>200)
-//			{
-//				freq_input=AD_Offset_Value-180;
-//			}
-			freq_input=AD_Offset_Value-173;
-			if(freq_input<3000)
-			{
-			PWM_Freq_DC(freq_input*3);
-			}
-			//PWM_Freq_DC(1000);
 	
-		
-		}
-		else 
-		{
-			if(AD_Offset_Value<50)
-			{
-			freq_input=0;
-			TIM_Cmd(TIM4, DISABLE); 
-			}
-			else if(AD_Offset_Value>100)
-			{
-				TIM_Cmd(TIM4, ENABLE);
-			PWM_Freq_DC(80);
-			}
-		}
-				
-		
-		//Init_TIMER(ADC_SimpleConvertValue[1]);
-//		CrankPeroid++;
-//		if(CrankPeroid>7200)
-//		{
-//		CrankPeroid=7200;
-//		}
-	}
 	}
 }
+
+
 
 void Freq_Convert(uint16_t AD_Value)
 {

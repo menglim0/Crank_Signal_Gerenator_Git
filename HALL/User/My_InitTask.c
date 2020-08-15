@@ -16,8 +16,7 @@ unsigned int AD_value_group[2];
 #define CAM_out_Pin GPIO_Pin_0
 //#define CAM_out_Pin GPIO_Pin_1
 
-#define Crank_out_Port GPIOA
-#define Crank_out_Pin GPIO_Pin_8
+
 
 uint16_t CAM_Phase[]={15,19,23,26,45,49,75,79,83,109}; 
 uint16_t CAM_Phase_ofst[]={7,15,35,39,43,75,95,99,103,106}; 
@@ -49,7 +48,7 @@ void My_InitTask(void)
   /* ADC configuration ------------------------------------------------------*/
   ADC_Configuration();
 	
-	Init_TIMER(7200);
+	//Init_TIMER(7200);
 	//Init_PWM(0x01F0);
 }
 
