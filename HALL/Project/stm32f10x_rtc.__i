@@ -1,4 +1,4 @@
--c --cpu Cortex-M3 -g -O0 --apcs=interwork -I .\Libraries -I .\Libraries\inc -I .\FreeRTOS\include -I .\FreeRTOS\portable -I .\User -I .\FreeRTOS
+-c --cpu Cortex-M3 -g -O0 --apcs=interwork -I .\Libraries -I .\Libraries\inc -I .\FreeRTOS\include -I .\FreeRTOS\portable -I .\User -I .\FreeRTOS -I .\User
 -I.\RTE\_song370
 -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
 -IC:\Keil_v5\ARM\CMSIS\Include

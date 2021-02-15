@@ -1,6 +1,7 @@
 
 /*  -------------------------Includes-----------------------------------------*/
-#include "My_InitTask.h"  
+#include "My_InitTask.h" 
+#include "CAM_Pulse.h"
 
 #define ADC1_DR_Address    ((u32)0x4001244C)
 
@@ -12,19 +13,25 @@ unsigned int AD_value_group[2];
 #define  N   50      //The sample freq is 50 
 #define  M  12      //12 adc channel
 
-#define CAM_out_Port GPIOA
-#define CAM_out_Pin GPIO_Pin_0
+
 
 #define Crank_out_Port GPIOA
 #define Crank_out_Pin GPIO_Pin_8
 
-uint16_t CAM_Phase[]={15,19,23,26,45,49,75,79,83,109}; 
-uint16_t CAM_Phase_ofst[]={5,9,35,39,43,69,95,99,103,106}; 
+#define CAM_output_Port GPIOA
+#define CAM_output_PIN GPIO_Pin_0
+
+#define CAMIN_Port GPIOB
+#define CAMIN_PIN GPIO_Pin_1
+
+
+
 /* Private variables ---------------------------------------------------------*/
 
 
 vu16 ADC_ConvertedValue[4];
 ErrorStatus HSEStartUpStatus;
+
 vu16 timer4_It_Cnt,timer4_It_Cnt_Raw;
 
 /*  -------------------------Functions-----------------------------------------*/
@@ -138,6 +145,11 @@ void GPIO_Configuration(void)
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
+	
+				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1; 			//配置LED D5端口挂接到13端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
+  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
 	
 				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
@@ -364,53 +376,12 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					
-			//GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						if((timer4_It_Cnt_Raw>(CAM_Phase_ofst[0]*6))&&(timer4_It_Cnt_Raw<=(CAM_Phase_ofst[1]*6)))
-						{
-							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						}
-						else if((timer4_It_Cnt_Raw>(CAM_Phase_ofst[1]*6))&&(timer4_It_Cnt_Raw<=(CAM_Phase_ofst[2]*6)))
-						{
-							GPIO_SetBits(CAM_out_Port, CAM_out_Pin);
-						}
-							else if((timer4_It_Cnt_Raw>(CAM_Phase_ofst[2]*6))&&(timer4_It_Cnt_Raw<=(CAM_Phase_ofst[3]*6)))
-					{
-							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						}
-						else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[3]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[4]*6))
-						{
-							GPIO_SetBits(CAM_out_Port, CAM_out_Pin);
-						}
-							else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[4]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[5]*6))
-						{
-							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						}
-						else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[5]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[6]*6))
-						{
-							GPIO_SetBits(CAM_out_Port, CAM_out_Pin);
-						}
-						else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[6]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[7]*6))
-						{
-							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						}
-						else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[7]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[8]*6))
-						{
-							GPIO_SetBits(CAM_out_Port, CAM_out_Pin);
-						}
-							else if((timer4_It_Cnt_Raw>CAM_Phase_ofst[8]*6)&&(timer4_It_Cnt_Raw<=CAM_Phase_ofst[9]*6))
-						{
-							GPIO_ResetBits(CAM_out_Port, CAM_out_Pin);
-						}
-							else if(timer4_It_Cnt_Raw>CAM_Phase_ofst[9]*6)
-						{
-							GPIO_SetBits(CAM_out_Port, CAM_out_Pin);
-						}
 
-	
-						
 					
-      // GPIO_WriteBit(GPIOD, GPIO_Pin_2, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOD, GPIO_Pin_2)));
-      //  LED1=!LED1;
+					CAM_Pulse_Output(CAM_out_Phase,10,CAM_output_Port,CAM_output_PIN);
+					
+					CAM_Pulse_Output(CAM_in_Phase,10,CAMIN_Port,CAMIN_PIN);
+			
         }
  }
 

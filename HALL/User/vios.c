@@ -14,3 +14,11 @@ ADC_SoftwareStartConvCmd(ADC1, ENABLE);  //
 while(!ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC ));//
 return ADC_GetConversionValue(ADC1);  //
 }
+
+
+u16 Get_AD_Filter(uint16_t inputValue)
+{
+
+	return 0;
+
+}

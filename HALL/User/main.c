@@ -54,6 +54,7 @@
 
 /* Standard includes. */
 #include <stdio.h>
+#include <stdbool.h>
 
 /* Scheduler includes. */
 #include "FreeRTOS.h"
@@ -83,6 +84,10 @@ uint16_t Freq_PreARR[5]={180,1500,2000,2500,2770};
 uint16_t Freq_Prefres[5]={1,2,4,8,16};
 uint16_t Freq_Offset[5]={0,750,660,585,573};
 #define AD_MIN 0
+
+bool Timer4_Enable_Flag;
+
+uint16_t Filter_index=0,Filter_SumValue,Filter_length=16,Filter_AD_Temp[16]={0},Filter_Delete;
 
 
 
@@ -115,7 +120,7 @@ int main( void )
 void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
-	char LoopCnt;
+	char LoopCnt,Filt_cnt;
 	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
 	data = data;
 	xLastExecutionTime = xTaskGetTickCount();
@@ -151,13 +156,42 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 		{
 			AD_Offset_Value=0;
 		}
+		
+		Filter_AD_Temp[Filter_index]=AD_Offset_Value;
+//		Filter_index++;
+//		if(Filter_index>=16)
+//		{
+//			Filter_index=0;
+//			Filter_Delete=Filter_AD_Temp[0];
+//		}
+//		
+//		if(Filter_index>=15)
+//		{
+//			Filter_Delete=Filter_AD_Temp[0];
+//		}
+//		else
+//		{
+//			Filter_Delete=Filter_AD_Temp[Filter_index+1];
+//		}
+				
 			//TIM4->ARR = 60000-1;
 		//Freq_Convert(ADC_SimpleConvertValue[1]);
+		Filter_SumValue=0;
+		for(Filt_cnt=0;Filt_cnt<16;Filt_cnt++)
+		{
+			Filter_SumValue=Filter_SumValue+Filter_AD_Temp[Filt_cnt];
+		}
+	
 		
 
-		if(AD_Offset_Value>200)
+		if(AD_Offset_Value>100)
 		{
- 		TIM_Cmd(TIM4, ENABLE);
+			if(Timer4_Enable_Flag==false)
+			{
+				TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
+				TIM_Cmd(TIM4, ENABLE);
+				Timer4_Enable_Flag=true;
+			}
 //			if(AD_Offset_Value<80)
 //			{
 //				freq_input=0;
@@ -166,28 +200,36 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 //			{
 //				freq_input=AD_Offset_Value-180;
 //			}
-			freq_input=AD_Offset_Value-173;
+			freq_input=Filter_SumValue/16;
 			if(freq_input<3000)
 			{
 			PWM_Freq_DC(freq_input*3);
 			}
 			//PWM_Freq_DC(1000);
 	
-		
+//		
 		}
 		else 
 		{
-			if(AD_Offset_Value<50)
+
+			if(Timer4_Enable_Flag==true)
 			{
-			freq_input=0;
-			TIM_Cmd(TIM4, DISABLE); 
+				Timer4_Enable_Flag=false;
 			}
-			else if(AD_Offset_Value>100)
-			{
-				TIM_Cmd(TIM4, ENABLE);
-			PWM_Freq_DC(80);
-			}
-		}
+				TIM_Cmd(TIM4, DISABLE); 
+				if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
+					{
+					TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
+					}
+					
+			 }
+	
+//			else if(AD_Offset_Value>100)
+//			{
+//				TIM_Cmd(TIM4, ENABLE);
+//			PWM_Freq_DC(0);
+//			}
+//		}
 				
 		
 		//Init_TIMER(ADC_SimpleConvertValue[1]);
@@ -200,47 +242,47 @@ if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
 	}
 }
 
-void Freq_Convert(uint16_t AD_Value)
-{
-	uint8_t index;
-	uint16_t psc,arr;
+//void Freq_Convert(uint16_t AD_Value)
+//{
+//	uint8_t index;
+//	uint16_t psc,arr;
 	
-	if(AD_Value>Freq_PreARR[4]+200)
-		{
-			TIM_Cmd(TIM4, DISABLE); 
-		}
-		else if(AD_Value<Freq_PreARR[4]+100)
-		{
-			TIM_Cmd(TIM4, ENABLE); 
-		}
-	
-	for(index=1;index<5;index++)
-	{
-	
-		if(AD_Value<Freq_PreARR[index]&&AD_Value>Freq_PreARR[index-1])
-		{
-			psc=Freq_Prefres[index-1];
-			arr=AD_Value-Freq_Offset[index-1];
-			
-		}
-		else if(AD_Value>Freq_PreARR[4])
-		{
-	    psc=Freq_Prefres[4];
-			arr=AD_Value-Freq_Offset[4];
-		}
-		else if(AD_Value<Freq_PreARR[0])
-	 {
-			psc=Freq_Prefres[0];
-			arr=Freq_PreARR[0];
-	 }
-		
-	}
-	TIM4->ARR=arr;
-	TIM4->PSC=(psc*8-1);
-	
-		TIM4->ARR=2300;
-	TIM4->PSC=16*4-1;
-}
+//	if(AD_Value>Freq_PreARR[4]+200)
+//		{
+//			TIM_Cmd(TIM4, DISABLE); 
+//		}
+//		else if(AD_Value<Freq_PreARR[4]+100)
+//		{
+//			TIM_Cmd(TIM4, ENABLE); 
+//		}
+//	
+//	for(index=1;index<5;index++)
+//	{
+//	
+//		if(AD_Value<Freq_PreARR[index]&&AD_Value>Freq_PreARR[index-1])
+//		{
+//			psc=Freq_Prefres[index-1];
+//			arr=AD_Value-Freq_Offset[index-1];
+//			
+//		}
+//		else if(AD_Value>Freq_PreARR[4])
+//		{
+//	    psc=Freq_Prefres[4];
+//			arr=AD_Value-Freq_Offset[4];
+//		}
+//		else if(AD_Value<Freq_PreARR[0])
+//	 {
+//			psc=Freq_Prefres[0];
+//			arr=Freq_PreARR[0];
+//	 }
+//		
+//	}
+//	TIM4->ARR=arr;
+//	TIM4->PSC=(psc*8-1);
+//	
+//		TIM4->ARR=2300;
+//	TIM4->PSC=16*4-1;
+//}
 
 void PWM_Freq_DC(uint16_t freq)
 {

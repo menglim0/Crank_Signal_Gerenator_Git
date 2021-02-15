@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F10X_MD</Define>
               <Undefine></Undefine>
-              <IncludePath>.\Libraries;.\Libraries\inc;.\FreeRTOS\include;.\FreeRTOS\portable;.\User;.\FreeRTOS</IncludePath>
+              <IncludePath>.\Libraries;.\Libraries\inc;.\FreeRTOS\include;.\FreeRTOS\portable;.\User;.\FreeRTOS;.\User</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -499,6 +499,11 @@
               <FileName>vios.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\User\vios.c</FilePath>
+            </File>
+            <File>
+              <FileName>CAM_Pulse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\CAM_Pulse.c</FilePath>
             </File>
           </Files>
         </Group>

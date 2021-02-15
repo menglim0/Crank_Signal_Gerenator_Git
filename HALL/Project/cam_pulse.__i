@@ -4,4 +4,4 @@
 -IC:\Keil_v5\ARM\CMSIS\Include
 -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0
 -D__UVISION_VERSION="524" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD
--o .\project\misc.o --omf_browse .\project\misc.crf --depend .\project\misc.d "Libraries\src\misc.c"
+-o .\project\cam_pulse.o --omf_browse .\project\cam_pulse.crf --depend .\project\cam_pulse.d "User\CAM_Pulse.c"

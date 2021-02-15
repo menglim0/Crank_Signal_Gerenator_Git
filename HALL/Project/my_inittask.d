@@ -29,3 +29,4 @@
 .\project\my_inittask.o: .\Libraries\inc\stm32f10x_usart.h
 .\project\my_inittask.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\project\my_inittask.o: .\Libraries\inc\misc.h
+.\project\my_inittask.o: User\CAM_Pulse.h
