@@ -2,6 +2,8 @@
 /*  -------------------------Includes-----------------------------------------*/
 #include "My_InitTask.h" 
 #include "CAM_Pulse.h"
+#include "usart.h"
+#include "FLEE.h"
 
 #define ADC1_DR_Address    ((u32)0x4001244C)
 
@@ -38,6 +40,7 @@ vu16 timer4_It_Cnt,timer4_It_Cnt_Raw;
 /**** stm32的初始化工作全部在这里完成  *****/
 void My_InitTask(void)
 {
+	uint8_t Flash_Read_Buffer[32];
    /* Configure the system clocks */
   	RCC_Configuration();
   	SysTick_Configuration();
@@ -47,6 +50,7 @@ void My_InitTask(void)
 
   /* Configure the GPIO ports */
   	GPIO_Configuration();
+		uart_init(115200);	 //串口初始化为115200
 	
 /* DMA configuration ------------------------------------------------------*/
   //DMA_Configuration();
@@ -55,6 +59,10 @@ void My_InitTask(void)
 	
 	Init_TIMER(7200);
 	//Init_PWM(0x01F0);
+	printf("Start_OK");
+	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
+	Usart1_Send(Flash_Read_Buffer,32);
+	//Flash_Write_16byte_with_Check();
 }
 
 

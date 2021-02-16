@@ -69,7 +69,8 @@
 /* user files  		*/
 #include "My_InitTask.h"
 #include "vios.h"
-
+#include "usart.h"
+#include "FLEE.h"
 
 void Freq_Convert(uint16_t AD_Value);
 void PWM_Freq_DC(uint16_t freq);
@@ -77,8 +78,7 @@ void Task1 (void *data);
 void Task2 (void *data);
 void Task3 (void *data);
 void Task4 (void *data);
-/*void Task5 (void *data);
-void Task6 (void *data);*/
+
 
 uint16_t Freq_PreARR[5]={180,1500,2000,2500,2770};
 uint16_t Freq_Prefres[5]={1,2,4,8,16};
@@ -120,7 +120,7 @@ int main( void )
 void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
-	char LoopCnt,Filt_cnt;
+	char LoopCnt,Filt_cnt,index_ii;
 	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
 	data = data;
 	xLastExecutionTime = xTaskGetTickCount();
@@ -129,116 +129,89 @@ void Task1 (void *data)
 	{
 		 vTaskDelayUntil( &xLastExecutionTime, 2/ portTICK_RATE_MS );
 		LoopCnt++;
+		
+		if(Usart1_Receive_Complete==true)
+		{
+			for (index_ii=0;index_ii<Usart1_Rec_Cnt;index_ii++)
+			{
+					write_date[index_ii]=DMA_Rece_Buf[index_ii];
+			}
+				Flash_Write_16byte_with_Check(); //DMA接收串口数据缓冲区
+
+				Usart1_Receive_Complete=false;
+		}
+		
 		if(LoopCnt>15)
-		{LoopCnt=0;
-if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
-    GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  点亮LED 
-		//vTaskDelay( 1 / portTICK_RATE_MS ); 
-		else
-		GPIO_ResetBits(GPIOG,GPIO_Pin_14);            //  熄灭LED
+		{
+				LoopCnt=0;
+				if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
+						GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  点亮LED 
+				else
+					GPIO_ResetBits(GPIOG,GPIO_Pin_14);            //  熄灭LED
 
-		//vTaskDelay( 1 / portTICK_RATE_MS ); 
-		
-		//AD_ConvertFunction();
-		ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_0);
-		//TIM_SetCompare1(TIM4,ADC_SimpleConvertValue[0]>>2);
-		ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_1);
-		//TIM4->ARR =(ADC_SimpleConvertValue[1]-400)<<4;
-		//TIM_SetCompare2(TIM4,(ADC_SimpleConvertValue[1]-400)<<4);
-		ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
-		ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
-		
-		if(ADC_SimpleConvertValue[1]>AD_MIN)
-		{
-		AD_Offset_Value=ADC_SimpleConvertValue[1]-AD_MIN;
-		}
-		else
-		{
-			AD_Offset_Value=0;
-		}
-		
-		Filter_AD_Temp[Filter_index]=AD_Offset_Value;
-//		Filter_index++;
-//		if(Filter_index>=16)
-//		{
-//			Filter_index=0;
-//			Filter_Delete=Filter_AD_Temp[0];
-//		}
-//		
-//		if(Filter_index>=15)
-//		{
-//			Filter_Delete=Filter_AD_Temp[0];
-//		}
-//		else
-//		{
-//			Filter_Delete=Filter_AD_Temp[Filter_index+1];
-//		}
+			//vTaskDelay( 1 / portTICK_RATE_MS ); 
 				
-			//TIM4->ARR = 60000-1;
-		//Freq_Convert(ADC_SimpleConvertValue[1]);
-		Filter_SumValue=0;
-		for(Filt_cnt=0;Filt_cnt<16;Filt_cnt++)
-		{
-			Filter_SumValue=Filter_SumValue+Filter_AD_Temp[Filt_cnt];
-		}
+				//AD_ConvertFunction();
+				ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_0);
+				//TIM_SetCompare1(TIM4,ADC_SimpleConvertValue[0]>>2);
+				ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_1);
+				//TIM4->ARR =(ADC_SimpleConvertValue[1]-400)<<4;
+				//TIM_SetCompare2(TIM4,(ADC_SimpleConvertValue[1]-400)<<4);
+				ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
+				ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
+		
+			if(ADC_SimpleConvertValue[1]>AD_MIN)
+			{
+				AD_Offset_Value=ADC_SimpleConvertValue[1]-AD_MIN;
+			}
+			else
+			{
+				AD_Offset_Value=0;
+			}
+		
+			Filter_AD_Temp[Filter_index]=AD_Offset_Value;
+
+			Filter_SumValue=0;
+			for(Filt_cnt=0;Filt_cnt<16;Filt_cnt++)
+			{
+					Filter_SumValue=Filter_SumValue+Filter_AD_Temp[Filt_cnt];
+			}
 	
 		
 
-		if(AD_Offset_Value>100)
-		{
-			if(Timer4_Enable_Flag==false)
+			if(AD_Offset_Value>100)
 			{
-				TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
-				TIM_Cmd(TIM4, ENABLE);
-				Timer4_Enable_Flag=true;
-			}
-//			if(AD_Offset_Value<80)
-//			{
-//				freq_input=0;
-//			}
-//			else if(AD_Offset_Value>200)
-//			{
-//				freq_input=AD_Offset_Value-180;
-//			}
-			freq_input=Filter_SumValue/16;
-			if(freq_input<3000)
-			{
-			PWM_Freq_DC(freq_input*3);
-			}
-			//PWM_Freq_DC(1000);
-	
-//		
-		}
-		else 
-		{
+				if(Timer4_Enable_Flag==false)
+				{
+					TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
+					TIM_Cmd(TIM4, ENABLE);
+					Timer4_Enable_Flag=true;
+				}
 
-			if(Timer4_Enable_Flag==true)
-			{
-				Timer4_Enable_Flag=false;
+				freq_input=Filter_SumValue/16;
+				if(freq_input<3000)
+				{
+				PWM_Freq_DC(freq_input*3);
+				}
+
 			}
+			else 
+			{
+
+				if(Timer4_Enable_Flag==true)
+				{
+					Timer4_Enable_Flag=false;
+				}
 				TIM_Cmd(TIM4, DISABLE); 
 				if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
-					{
+				{
 					TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
-					}
+				}
 					
 			 }
 	
-//			else if(AD_Offset_Value>100)
-//			{
-//				TIM_Cmd(TIM4, ENABLE);
-//			PWM_Freq_DC(0);
-//			}
-//		}
-				
-		
-		//Init_TIMER(ADC_SimpleConvertValue[1]);
-//		CrankPeroid++;
-//		if(CrankPeroid>7200)
-//		{
-//		CrankPeroid=7200;
-//		}
-	}
+
+		}
 	}
 }
 
