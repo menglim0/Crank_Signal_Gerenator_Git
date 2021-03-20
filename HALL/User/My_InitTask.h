@@ -3,6 +3,7 @@
 
 
 #include "stm32f10x.h"
+#include "vios.h"
 	
 
 extern vu16 timer4_It_Cnt_Raw;

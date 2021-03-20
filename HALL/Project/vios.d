@@ -29,3 +29,4 @@
 .\project\vios.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\project\vios.o: .\Libraries\inc\misc.h
 .\project\vios.o: User\vios.h
+.\project\vios.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

@@ -1,1 +1,7 @@
--c --cpu Cortex-M3 -g -O0 --apcs=interwork -I.\Libraries -I.\Libraries\inc -I.\FreeRTOS\include -I.\FreeRTOS\portable -I.\User -I.\FreeRTOS -I "d:\Keil\ARM\CMSIS\Include" -I "d:\Keil\ARM\INC\ST\STM32F10x" -DUSE_STDPERIPH_DRIVER -DSTM32F10X_HD -o ".\Project\stm32f10x_usart.o" --omf_browse ".\Project\stm32f10x_usart.crf" --depend ".\Project\stm32f10x_usart.d" "Libraries\src\stm32f10x_usart.c"
+-c --cpu Cortex-M3 -D__MICROLIB -g -O2 --apcs=interwork -I .\Libraries -I .\Libraries\inc -I .\FreeRTOS\include -I .\FreeRTOS\portable -I .\User -I .\FreeRTOS -I .\User
+-I.\RTE\_song370
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
+-IC:\Keil_v5\ARM\CMSIS\Include
+-IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0
+-D__UVISION_VERSION="524" -DSTM32F10X_MD -DUSE_STDPERIPH_DRIVER -DSTM32F10X_MD
+-o .\project\stm32f10x_usart.o --omf_browse .\project\stm32f10x_usart.crf --depend .\project\stm32f10x_usart.d "Libraries\src\stm32f10x_usart.c"

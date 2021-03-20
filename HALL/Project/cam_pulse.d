@@ -30,3 +30,4 @@
 .\project\cam_pulse.o: .\Libraries\inc\stm32f10x_usart.h
 .\project\cam_pulse.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\project\cam_pulse.o: .\Libraries\inc\misc.h
+.\project\cam_pulse.o: User\vios.h

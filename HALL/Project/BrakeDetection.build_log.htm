@@ -22,7 +22,7 @@ Dialog DLL:      TARMSTM.DLL V1.66.0.0
  
 <h2>Project:</h2>
 D:\SmartGit_Repository\Crank_Signal_Gerenator_Git\HALL\song370.uvprojx
-Project File Date:  02/13/2021
+Project File Date:  03/18/2021
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 5 (build 528)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
@@ -46,29 +46,69 @@ compiling stm32f10x_adc.c...
 compiling stm32f10x_dma.c...
 compiling stm32f10x_tim.c...
 compiling stm32f10x_rtc.c...
+compiling stm32f10x_usart.c...
 compiling main.c...
-User\main.c(124): warning:  #177-D: variable "CrankPeroid"  was declared but never referenced
+User\vios.h(11): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Cylinder - give arg types
+  u8 VIOS_Get_Misfire_Cylinder();
+User\vios.h(14): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Enable - give arg types
+  u8 VIOS_Get_Misfire_Enable();
+User\FLEE.h(28): warning:  #1295-D: Deprecated declaration Flash_Find_Address - give arg types
+  uint32_t Flash_Find_Address();
+User\main.c(145): warning:  #223-D: function "Flash_Write_16byte_with_Check" declared implicitly
+                                Flash_Write_16byte_with_Check(); //DMA接收串口数据缓冲区
+User\main.c(127): warning:  #177-D: variable "CrankPeroid"  was declared but never referenced
         uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
-User\main.c(289): warning:  #177-D: variable "compare_dutycycle"  was declared but never referenced
+User\main.c(279): warning:  #177-D: variable "compare_dutycycle"  was declared but never referenced
         uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
-User\main.c(291): warning:  #177-D: variable "arr_temp"  was declared but never referenced
+User\main.c(281): warning:  #177-D: variable "arr_temp"  was declared but never referenced
         uint32_t arr_peroid_long,arr_peroid_long_temp,arr_temp;
-User\main.c: 3 warnings, 0 errors
+User\main.c: 7 warnings, 0 errors
 compiling My_InitTask.c...
+User\vios.h(11): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Cylinder - give arg types
+  u8 VIOS_Get_Misfire_Cylinder();
+User\vios.h(14): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Enable - give arg types
+  u8 VIOS_Get_Misfire_Enable();
 User\CAM_Pulse.h(14): warning:  #1-D: last line of file ends without a newline
   #endif
-User\My_InitTask.c: 1 warning, 0 errors
+User\FLEE.h(28): warning:  #1295-D: Deprecated declaration Flash_Find_Address - give arg types
+  uint32_t Flash_Find_Address();
+User\My_InitTask.c(397): warning:  #223-D: function "CRANK_Freq_DC" declared implicitly
+                                                CRANK_Freq_DC(100*3); 
+User\My_InitTask.c: 5 warnings, 0 errors
 compiling vios.c...
+User\vios.h(11): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Cylinder - give arg types
+  u8 VIOS_Get_Misfire_Cylinder();
+User\vios.h(14): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Enable - give arg types
+  u8 VIOS_Get_Misfire_Enable();
+User\vios.c(35): warning:  #940-D: missing return statement at end of non-void function "VIOS_Set_Misfire_Cylinder" 
+  }
+User\vios.c(65): warning:  #940-D: missing return statement at end of non-void function "VIOS_Set_Misfire_Freq" 
+  }
+User\vios.c: 4 warnings, 0 errors
 compiling CAM_Pulse.c...
+User\vios.h(11): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Cylinder - give arg types
+  u8 VIOS_Get_Misfire_Cylinder();
+User\vios.h(14): warning:  #1295-D: Deprecated declaration VIOS_Get_Misfire_Enable - give arg types
+  u8 VIOS_Get_Misfire_Enable();
 User\CAM_Pulse.h(14): warning:  #1-D: last line of file ends without a newline
   #endif
 User\CAM_Pulse.c(5): warning:  #47-D: incompatible redefinition of macro "CAM_out"  (declared at line 4)
   #define CAM_out GPIO_Pin_0
-User\CAM_Pulse.c: 2 warnings, 0 errors
+User\CAM_Pulse.c: 4 warnings, 0 errors
+compiling usart.c...
+compiling flee.c...
+User\FLEE.h(28): warning:  #1295-D: Deprecated declaration Flash_Find_Address - give arg types
+  uint32_t Flash_Find_Address();
+User\flee.c(151): warning:  #177-D: variable "PageError"  was declared but never referenced
+        uint32_t PageError = 0;
+User\flee.c(275): warning:  #177-D: variable "PageError"  was declared but never referenced
+                        uint32_t PageError = 0;
+User\flee.c: 3 warnings, 0 errors
+compiling timer.c...
 linking...
-Program Size: Code=14628 RO-data=336 RW-data=224 ZI-data=18760  
+Program Size: Code=14384 RO-data=336 RW-data=256 ZI-data=19920  
 FromELF: creating hex file...
-".\Project\BrakeDetection.axf" - 0 Error(s), 6 Warning(s).
+".\Project\BrakeDetection.axf" - 0 Error(s), 23 Warning(s).
 
 <h2>Software Packages used:</h2>
 
@@ -82,7 +122,7 @@ Package Vendor: Keil
   C:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
 
 <h2>Collection of Component Files used:</h2>
-Build Time Elapsed:  00:00:08
+Build Time Elapsed:  00:00:10
 </pre>
 </body>
 </html>

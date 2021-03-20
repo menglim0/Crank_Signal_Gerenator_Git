@@ -1,4 +1,4 @@
---cpu Cortex-M3 -g --apcs=interwork 
+--cpu Cortex-M3 -g --apcs=interwork --pd "__MICROLIB SETA 1"
 -I.\RTE\_song370
 -IC:\Keil_v5\ARM\PACK\Keil\STM32F1xx_DFP\2.2.0\Device\Include
 -IC:\Keil_v5\ARM\CMSIS\Include

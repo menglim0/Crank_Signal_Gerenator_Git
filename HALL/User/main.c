@@ -71,9 +71,10 @@
 #include "vios.h"
 #include "usart.h"
 #include "FLEE.h"
+#include "timer.h"
 
 void Freq_Convert(uint16_t AD_Value);
-void PWM_Freq_DC(uint16_t freq);
+void CRANK_Freq_DC(uint16_t freq);
 void Task1 (void *data);
 void Task2 (void *data);
 void Task3 (void *data);
@@ -83,6 +84,8 @@ void Task4 (void *data);
 uint16_t Freq_PreARR[5]={180,1500,2000,2500,2770};
 uint16_t Freq_Prefres[5]={1,2,4,8,16};
 uint16_t Freq_Offset[5]={0,750,660,585,573};
+
+uint16_t Freq_Misfire = 300;
 #define AD_MIN 0
 
 bool Timer4_Enable_Flag;
@@ -123,6 +126,9 @@ void Task1 (void *data)
 	char LoopCnt,Filt_cnt,index_ii;
 	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
 	data = data;
+	
+
+	
 	xLastExecutionTime = xTaskGetTickCount();
 	 
 	while (1) 
@@ -159,6 +165,10 @@ void Task1 (void *data)
 				//TIM_SetCompare2(TIM4,(ADC_SimpleConvertValue[1]-400)<<4);
 				ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
 				ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
+				
+				PWM_Freq_DC(1,20,30000);
+			
+				PWM_Freq_DC(2,20,30000);
 		
 			if(ADC_SimpleConvertValue[1]>AD_MIN)
 			{
@@ -168,7 +178,7 @@ void Task1 (void *data)
 			{
 				AD_Offset_Value=0;
 			}
-		
+	
 			Filter_AD_Temp[Filter_index]=AD_Offset_Value;
 
 			Filter_SumValue=0;
@@ -189,10 +199,17 @@ void Task1 (void *data)
 				}
 
 				freq_input=Filter_SumValue/16;
-				if(freq_input<3000)
+				
+				if(VIOS_Set_Misfire_Enable(VIOS_Get_Misfire_Cylinder()))
 				{
-				PWM_Freq_DC(freq_input*3);
+					CRANK_Freq_DC(100*3);
 				}
+				else if(freq_input<3000)
+				{
+					//Time4 只触发中断，不做PWM out
+				CRANK_Freq_DC(2000*3);
+				}
+			
 
 			}
 			else 
@@ -257,7 +274,7 @@ void Task1 (void *data)
 //	TIM4->PSC=16*4-1;
 //}
 
-void PWM_Freq_DC(uint16_t freq)
+void CRANK_Freq_DC(uint16_t freq)
 {
 	uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
 	

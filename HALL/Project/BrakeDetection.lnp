@@ -17,11 +17,15 @@
 ".\project\stm32f10x_dma.o"
 ".\project\stm32f10x_tim.o"
 ".\project\stm32f10x_rtc.o"
+".\project\stm32f10x_usart.o"
 ".\project\main.o"
 ".\project\my_inittask.o"
 ".\project\vios.o"
 ".\project\cam_pulse.o"
---strict --scatter ".\Project\BrakeDetection.sct"
+".\project\usart.o"
+".\project\flee.o"
+".\project\timer.o"
+--library_type=microlib --strict --scatter ".\Project\BrakeDetection.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
 --list ".\BrakeDetection.map" -o .\Project\BrakeDetection.axf

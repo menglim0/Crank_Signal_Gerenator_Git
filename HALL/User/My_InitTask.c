@@ -4,6 +4,9 @@
 #include "CAM_Pulse.h"
 #include "usart.h"
 #include "FLEE.h"
+#include "vios.h"
+#include "stdbool.h"
+#include "timer.h"
 
 #define ADC1_DR_Address    ((u32)0x4001244C)
 
@@ -17,14 +20,14 @@ unsigned int AD_value_group[2];
 
 
 
-#define Crank_out_Port GPIOA
-#define Crank_out_Pin GPIO_Pin_8
+#define Crank_out_Port GPIOB
+#define Crank_out_Pin GPIO_Pin_0
 
 #define CAM_output_Port GPIOA
-#define CAM_output_PIN GPIO_Pin_0
+#define CAM_output_PIN GPIO_Pin_7
 
-#define CAMIN_Port GPIOB
-#define CAMIN_PIN GPIO_Pin_1
+#define CAMIN_Port GPIOA
+#define CAMIN_PIN GPIO_Pin_6
 
 
 
@@ -58,6 +61,12 @@ void My_InitTask(void)
   ADC_Configuration();
 	
 	Init_TIMER(7200);
+	
+		TIM3_PWM_Init(6009,1000);	 //不分频。PWM频率=72000/900=8Khz
+		TIM_SetCompare4(TIM3,800);	
+	
+	 	TIM2_Int_Init(6009,1000);	
+		TIM_SetCompare1(TIM2,800);         //设置占空比为1/3 
 	//Init_PWM(0x01F0);
 	printf("Start_OK");
 	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
@@ -149,12 +158,12 @@ void GPIO_Configuration(void)
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
 															//使能各个端口时钟，重要！！！
 	
-			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
+			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
 	
-				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_1; 			//配置LED D5端口挂接到13端口
+				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
@@ -367,14 +376,37 @@ void TIM4_IRQHandler(void)   //TIM3中断
         {
         TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
 				timer4_It_Cnt_Raw++;
+					
 					if(timer4_It_Cnt_Raw>=720)
 					{
-						timer4_It_Cnt_Raw=0;
+						timer4_It_Cnt_Raw=0;						
+						
+				
 					}
+					if(timer4_It_Cnt_Raw>=120)
+					{
+					VIOS_Set_Misfire_Cylinder((timer4_It_Cnt_Raw-120)/180);
+					}
+					else
+					{
+					VIOS_Set_Misfire_Cylinder(0);
+					}
+					
+					if(VIOS_Set_Misfire_Enable(VIOS_Get_Misfire_Cylinder()))
+					{
+						CRANK_Freq_DC(100*3); 
+							TIM_Cmd(TIM2, ENABLE); 
+					}
+					else
+					{
+						TIM_Cmd(TIM2, DISABLE); 
+					}
+					
 					
 					timer4_It_Cnt=timer4_It_Cnt_Raw%360;
 					if((timer4_It_Cnt<360&timer4_It_Cnt>=348)|(timer4_It_Cnt<360&timer4_It_Cnt>=348))
-					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+					{
+						GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					else if((timer4_It_Cnt/3)%2==1)
 					{
