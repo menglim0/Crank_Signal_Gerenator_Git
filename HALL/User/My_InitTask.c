@@ -20,25 +20,35 @@ unsigned int AD_value_group[2];
 
 
 
+//#define Crank_out_Port GPIOB
+//#define Crank_out_Pin GPIO_Pin_0
+
+//#define CAM_output_Port GPIOA
+//#define CAM_output_PIN GPIO_Pin_7
+
+//#define CAMIN_Port GPIOA
+//#define CAMIN_PIN GPIO_Pin_6
+
 #define Crank_out_Port GPIOB
-#define Crank_out_Pin GPIO_Pin_0
+#define Crank_out_Pin GPIO_Pin_10
 
-#define CAM_output_Port GPIOA
-#define CAM_output_PIN GPIO_Pin_7
+#define CAM_output_Port GPIOB
+#define CAM_output_PIN GPIO_Pin_12
 
-#define CAMIN_Port GPIOA
-#define CAMIN_PIN GPIO_Pin_6
+#define CAMIN_Port GPIOB
+#define CAMIN_PIN GPIO_Pin_11
 
-
+#define SetVIOS_KNOCK_LOW() GPIO_ResetBits(GPIOA,GPIO_Pin_0)
 
 /* Private variables ---------------------------------------------------------*/
 
 
-vu16 ADC_ConvertedValue[4];
+uint16_t ADC_ConvertedValue[4];
 ErrorStatus HSEStartUpStatus;
 
-vu16 timer4_It_Cnt,timer4_It_Cnt_Raw;
-
+uint16_t timer4_It_Cnt,timer4_It_Cnt_Raw;
+uint16_t MINT_Knock_WinGate,MINT_Cyl_Num,MINT_Cyl_Num_Old;
+uint16_t Debug_Crank_Freq_Display;
 /*  -------------------------Functions-----------------------------------------*/
 /**** stm32的初始化工作全部在这里完成  *****/
 void My_InitTask(void)
@@ -67,6 +77,9 @@ void My_InitTask(void)
 	
 	 	TIM2_Int_Init(6009,1000);	
 		TIM_SetCompare1(TIM2,800);         //设置占空比为1/3 
+		
+		TIM1_Int_Init(6009,1000);	
+		TIM_SetCompare1(TIM1,800);         //设置占空比为1/3
 	//Init_PWM(0x01F0);
 	printf("Start_OK");
 	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
@@ -155,18 +168,29 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;					//定义一个GPIO结构体变量
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
 															//使能各个端口时钟，重要！！！
 	
 			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
-  	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
+  	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOA进行初始化配置
 	
-				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1; 			//配置LED D5端口挂接到13端口
+				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10|GPIO_Pin_11|GPIO_Pin_12; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
-  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
+  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOB进行初始化配置
+	
+					GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; 			//配置LED D5端口挂接到13端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	   		//复用功能输出推挽
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
+  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOB进行初始化配置
+	
+		/*  配置输入端口*/
+	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 ; 			//配置LED E0端口挂接到0端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;	   		//复用功能上拉输入
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;	   	//配置端口速度为50M
+  	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOE进行初始化配置
 	
 				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
@@ -190,9 +214,13 @@ void GPIO_Configuration(void)
   	GPIO_Init(GPIOE, &GPIO_InitStructure);				   	//将端口GPIOE进行初始化配置
 	 
 	 //PA0/1/2 ??????????
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3;
+	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_1|GPIO_Pin_2|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_5|GPIO_Pin_6|GPIO_Pin_7;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //??????
 	GPIO_Init(GPIOA, &GPIO_InitStructure);
+	
+		GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_0;
+	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN; //??????
+	GPIO_Init(GPIOB, &GPIO_InitStructure);
 	
 		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 ; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	   		//复用功能输出推挽
@@ -372,6 +400,8 @@ void AD_ConvertFunction(void)
 
 void TIM4_IRQHandler(void)   //TIM3中断
 {
+	uint8_t cyl_num;
+		uint32_t Init_Misfire_Frequency;
    if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
         {
         TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
@@ -380,31 +410,70 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					if(timer4_It_Cnt_Raw>=720)
 					{
 						timer4_It_Cnt_Raw=0;						
-						
-				
-					}
-					if(timer4_It_Cnt_Raw>=120)
-					{
-					VIOS_Set_Misfire_Cylinder((timer4_It_Cnt_Raw-120)/180);
-					}
-					else
-					{
-					VIOS_Set_Misfire_Cylinder(0);
+										
 					}
 					
-					if(VIOS_Set_Misfire_Enable(VIOS_Get_Misfire_Cylinder()))
+					//MINT_Knock_WinGate,MINT_Cyl_Num
+					
+
+					
+					if(timer4_It_Cnt_Raw>=120)
 					{
-						CRANK_Freq_DC(100*3); 
-							TIM_Cmd(TIM2, ENABLE); 
+					MINT_Cyl_Num=VIOS_Set_Misfire_Cylinder((timer4_It_Cnt_Raw-120)/180);
+					VIOS_Set_KNOCK_Cylinder(MINT_Cyl_Num);
+						
+						
 					}
 					else
 					{
-						TIM_Cmd(TIM2, DISABLE); 
+						VIOS_Set_Misfire_Cylinder(0);
+						VIOS_Set_KNOCK_Cylinder(0);
+					}
+					
+					if((VIOS_Misfire_EnableBit[MINT_Cyl_Num]&0x01)==1)
+					{
+						
+						Init_Misfire_Frequency=(uint32_t)(VIOS_Get_Crank_Freq(0)*VIOS_Misfire_Frequency)/4096;
+						if(Init_Misfire_Frequency<10)
+						{
+								Init_Misfire_Frequency=10;
+						}
+						CRANK_Freq_DC(Init_Misfire_Frequency);
+							
+					}
+					else
+					{
+						if(VIOS_Get_Crank_Freq(0)>10)
+						{
+								CRANK_Freq_DC(VIOS_Get_Crank_Freq(0));
+						}
+					}
+
+
+					
+					if(VIOS_Knock_EnableBit[MINT_Cyl_Num]==1 && MINT_Knock_WinGate<60)
+					{
+						PWM_Freq_DC(1,50,VIOS_Knock_Frequency);				
+						MINT_Knock_WinGate++; 
+					}
+					else
+					{
+						PWM_Freq_DC(1,0,VIOS_Knock_Frequency);	
+											
+					}
+					
+					
+					
+					
+					if(MINT_Cyl_Num_Old!=MINT_Cyl_Num)
+					{
+							MINT_Knock_WinGate=0;
 					}
 					
 					
 					timer4_It_Cnt=timer4_It_Cnt_Raw%360;
-					if((timer4_It_Cnt<360&timer4_It_Cnt>=348)|(timer4_It_Cnt<360&timer4_It_Cnt>=348))
+					
+					if((( timer4_It_Cnt>=348) && (timer4_It_Cnt<360)))
 					{
 						GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
@@ -418,9 +487,11 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					
 
 					
-					CAM_Pulse_Output(CAM_out_Phase,10,CAM_output_Port,CAM_output_PIN);
+					CAM_Pulse_Output(CAM_out_Phase,VIOS_VVT_Exh_Phase_Final,CAM_output_Port,CAM_output_PIN);
 					
-					CAM_Pulse_Output(CAM_in_Phase,10,CAMIN_Port,CAMIN_PIN);
+					CAM_Pulse_Output(CAM_in_Phase,VIOS_VVT_In_Phase_Final,CAMIN_Port,CAMIN_PIN);
+					
+					MINT_Cyl_Num_Old=MINT_Cyl_Num;
 			
         }
  }

@@ -25,7 +25,7 @@
 #define STM32_FLASH_BASE 0x08000000 	//STM32 FLASH的起始地址
 //FLASH解锁键值
 
-uint32_t Flash_Find_Address();
+uint32_t Flash_Find_Address(void);
 
 extern uint8_t write_date[32];
  

@@ -74,7 +74,7 @@
 #include "timer.h"
 
 void Freq_Convert(uint16_t AD_Value);
-void CRANK_Freq_DC(uint16_t freq);
+
 void Task1 (void *data);
 void Task2 (void *data);
 void Task3 (void *data);
@@ -86,9 +86,15 @@ uint16_t Freq_Prefres[5]={1,2,4,8,16};
 uint16_t Freq_Offset[5]={0,750,660,585,573};
 
 uint16_t Freq_Misfire = 300;
+
+uint16_t Debug_Crank_Freq_Display_Org;
+
+
+
+
 #define AD_MIN 0
 
-bool Timer4_Enable_Flag;
+
 
 uint16_t Filter_index=0,Filter_SumValue,Filter_length=16,Filter_AD_Temp[16]={0},Filter_Delete;
 
@@ -150,25 +156,14 @@ void Task1 (void *data)
 		if(LoopCnt>15)
 		{
 				LoopCnt=0;
-				if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
-						GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  点亮LED 
-				else
-					GPIO_ResetBits(GPIOG,GPIO_Pin_14);            //  熄灭LED
+			VIOS_GPIO_LED_Test();
+			
+			Main_74HC165=VIOS_Read_HC165(3);
 
 			//vTaskDelay( 1 / portTICK_RATE_MS ); 
 				
-				//AD_ConvertFunction();
-				ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_0);
-				//TIM_SetCompare1(TIM4,ADC_SimpleConvertValue[0]>>2);
-				ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_1);
-				//TIM4->ARR =(ADC_SimpleConvertValue[1]-400)<<4;
-				//TIM_SetCompare2(TIM4,(ADC_SimpleConvertValue[1]-400)<<4);
-				ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
-				ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
-				
-				PWM_Freq_DC(1,20,30000);
-			
-				PWM_Freq_DC(2,20,30000);
+			VIOS_ADC_Convert_Result();
+
 		
 			if(ADC_SimpleConvertValue[1]>AD_MIN)
 			{
@@ -180,127 +175,35 @@ void Task1 (void *data)
 			}
 	
 			Filter_AD_Temp[Filter_index]=AD_Offset_Value;
-
+			Filter_index++;
+			if(Filter_index>16)
+			{
+			Filter_index=0;
+			}
+			
 			Filter_SumValue=0;
 			for(Filt_cnt=0;Filt_cnt<16;Filt_cnt++)
 			{
 					Filter_SumValue=Filter_SumValue+Filter_AD_Temp[Filt_cnt];
 			}
-	
+			freq_input=Filter_SumValue/16;
+			Debug_Crank_Freq_Display_Org=freq_input;
+			Debug_Crank_Freq_Display=freq_input*2;
+			VIOS_Set_Crank_Freq(Debug_Crank_Freq_Display);
+			CRANK_OutPut_Function(freq_input*2);
+			VSPD_Output_WSS(VIOS_VehSpd_WSS);
+			VSPD_Output_VSS(VIOS_VehSpd_VSS);
+
+
+		}
 		
 
-			if(AD_Offset_Value>100)
-			{
-				if(Timer4_Enable_Flag==false)
-				{
-					TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
-					TIM_Cmd(TIM4, ENABLE);
-					Timer4_Enable_Flag=true;
-				}
-
-				freq_input=Filter_SumValue/16;
-				
-				if(VIOS_Set_Misfire_Enable(VIOS_Get_Misfire_Cylinder()))
-				{
-					CRANK_Freq_DC(100*3);
-				}
-				else if(freq_input<3000)
-				{
-					//Time4 只触发中断，不做PWM out
-				CRANK_Freq_DC(2000*3);
-				}
-			
-
-			}
-			else 
-			{
-
-				if(Timer4_Enable_Flag==true)
-				{
-					Timer4_Enable_Flag=false;
-				}
-				TIM_Cmd(TIM4, DISABLE); 
-				if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
-				{
-					TIM_ClearITPendingBit(TIM4, TIM_IT_Update  );  //清除TIMx的中断待处理位:TIM 中断源 
-				}
-					
-			 }
-	
-
-		}
 	}
 }
 
-//void Freq_Convert(uint16_t AD_Value)
-//{
-//	uint8_t index;
-//	uint16_t psc,arr;
-	
-//	if(AD_Value>Freq_PreARR[4]+200)
-//		{
-//			TIM_Cmd(TIM4, DISABLE); 
-//		}
-//		else if(AD_Value<Freq_PreARR[4]+100)
-//		{
-//			TIM_Cmd(TIM4, ENABLE); 
-//		}
-//	
-//	for(index=1;index<5;index++)
-//	{
-//	
-//		if(AD_Value<Freq_PreARR[index]&&AD_Value>Freq_PreARR[index-1])
-//		{
-//			psc=Freq_Prefres[index-1];
-//			arr=AD_Value-Freq_Offset[index-1];
-//			
-//		}
-//		else if(AD_Value>Freq_PreARR[4])
-//		{
-//	    psc=Freq_Prefres[4];
-//			arr=AD_Value-Freq_Offset[4];
-//		}
-//		else if(AD_Value<Freq_PreARR[0])
-//	 {
-//			psc=Freq_Prefres[0];
-//			arr=Freq_PreARR[0];
-//	 }
-//		
-//	}
-//	TIM4->ARR=arr;
-//	TIM4->PSC=(psc*8-1);
-//	
-//		TIM4->ARR=2300;
-//	TIM4->PSC=16*4-1;
-//}
 
-void CRANK_Freq_DC(uint16_t freq)
-{
-	uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
-	
-	uint32_t arr_peroid_long,arr_peroid_long_temp,arr_temp;
-	
-	arr_peroid_long = 72000000/(freq*6);
-	arr_peroid_long_temp=arr_peroid_long;
-	for(i=0;i<100;i++)
-	{
-		if(arr_peroid_long_temp>65535)
-		{
-			Var_psc++;
-			arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
-		}
-		else
-		{
-		break;
-		}
-	}
-	
-	arr_peroid_long	=arr_peroid_long/	(Var_psc+1);
-	arr_peroid = arr_peroid_long;	
-	
-		TIM4->ARR = arr_peroid;
-		TIM4->PSC =Var_psc;
-}
+
+
 
 /*
 void Task2 (void *data)
@@ -346,48 +249,9 @@ void Task3 (void *data)
 }
 
 
-void Task4 (void *data)
-{
-	data = data;
-
-	while (1) 
-	{
-		GPIO_ResetBits(GPIOF, GPIO_Pin_9);            //  熄灭LED
-		
-		vTaskDelay( 1000 / portTICK_RATE_MS ); 
-		GPIO_SetBits( GPIOF,GPIO_Pin_9);             //  点亮LED 
-
-
-		vTaskDelay( 1000 / portTICK_RATE_MS ); 
-	}
-}
 */
-/*
-void Task5 (void *data)
-{
-	data = data;
-
-	while (1) 
-	{
-		
-
-		vTaskDelay( 1000 / portTICK_RATE_MS ); 
-	}
-}
 
 
-void Task6 (void *data)
-{
-	data = data;
-
-	while (1) 
-	{
-		
-
-		vTaskDelay( 1000 / portTICK_RATE_MS ); 
-	}
-}
-*/
 
 
 
