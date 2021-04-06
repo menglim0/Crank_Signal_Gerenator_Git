@@ -148,7 +148,7 @@ void writeFlashTest(uint32_t start_address,uint8_t *data,uint8_t length)
 	//1¡¢½âËøFLASH
 	uint8_t write_i,data_i;  
 	uint32_t data_temp[4];
-	uint32_t PageError = 0;
+//	uint32_t PageError = 0;
 
 	//2¡¢²Á³ıFLASH
 	//³õÊ¼»¯FLASH_EraseInitTypeDef

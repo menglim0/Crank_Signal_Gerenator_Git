@@ -2,11 +2,10 @@
 #define __VIOS_H
 
 #include "stm32f10x.h"
-extern uint16_t ADC_SimpleConvertValue[9];
+extern uint32_t ADC_SimpleConvertValue[9];
 extern uint8_t VIOS_Misfire_Enable;
-extern uint32_t  DA[4]; 
 extern uint32_t VIOS_VehSpd_WSS,VIOS_VehSpd_VSS;
-
+extern uint32_t VIOS_Crank_Frequency;
 extern uint8_t VIOS_KNOCK_Enable;
 extern uint8_t VIOS_KNOCK_Cylinder;
 extern uint16_t VIOS_KNOCK_Freq;

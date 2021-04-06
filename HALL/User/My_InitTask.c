@@ -356,7 +356,7 @@ void Init_TIMER(uint16_t period)
 	
 	TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );// enable interrupt
 
-	TIM_Cmd(TIM4, ENABLE); 		//TIM4总开关：开启 
+	//TIM_Cmd(TIM4, ENABLE); 		//TIM4总开关：开启 
 }
 
 
@@ -400,7 +400,6 @@ void AD_ConvertFunction(void)
 
 void TIM4_IRQHandler(void)   //TIM3中断
 {
-	uint8_t cyl_num;
 		uint32_t Init_Misfire_Frequency;
    if (TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET) //检查指定的TIM中断发生与否:TIM 中断源 
         {
@@ -413,16 +412,11 @@ void TIM4_IRQHandler(void)   //TIM3中断
 										
 					}
 					
-					//MINT_Knock_WinGate,MINT_Cyl_Num
-					
-
-					
+						
 					if(timer4_It_Cnt_Raw>=120)
 					{
-					MINT_Cyl_Num=VIOS_Set_Misfire_Cylinder((timer4_It_Cnt_Raw-120)/180);
-					VIOS_Set_KNOCK_Cylinder(MINT_Cyl_Num);
-						
-						
+							MINT_Cyl_Num=VIOS_Set_Misfire_Cylinder((timer4_It_Cnt_Raw-120)/180);
+							VIOS_Set_KNOCK_Cylinder(MINT_Cyl_Num);	
 					}
 					else
 					{
@@ -434,16 +428,16 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					{
 						
 						Init_Misfire_Frequency=(uint32_t)(VIOS_Get_Crank_Freq(0)*VIOS_Misfire_Frequency)/4096;
-						if(Init_Misfire_Frequency<10)
+						if(Init_Misfire_Frequency<200)
 						{
-								Init_Misfire_Frequency=10;
+								Init_Misfire_Frequency=200;
 						}
 						CRANK_Freq_DC(Init_Misfire_Frequency);
 							
 					}
 					else
 					{
-						if(VIOS_Get_Crank_Freq(0)>10)
+						if(VIOS_Get_Crank_Freq(0)>0)
 						{
 								CRANK_Freq_DC(VIOS_Get_Crank_Freq(0));
 						}
@@ -451,18 +445,16 @@ void TIM4_IRQHandler(void)   //TIM3中断
 
 
 					
-					if(VIOS_Knock_EnableBit[MINT_Cyl_Num]==1 && MINT_Knock_WinGate<60)
+					if(VIOS_Knock_EnableBit[MINT_Cyl_Num]==1 && MINT_Knock_WinGate<60&&(VIOS_Get_Crank_Freq(0)>200))
 					{
-						PWM_Freq_DC(1,50,VIOS_Knock_Frequency);				
+						KNOCK_Output_Freq(VIOS_Knock_Frequency,1);				
 						MINT_Knock_WinGate++; 
 					}
 					else
 					{
-						PWM_Freq_DC(1,0,VIOS_Knock_Frequency);	
+						KNOCK_Output_Freq(VIOS_Knock_Frequency,0);	
 											
-					}
-					
-					
+					}									
 					
 					
 					if(MINT_Cyl_Num_Old!=MINT_Cyl_Num)
@@ -484,8 +476,7 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					else
 					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
-					
-
+	
 					
 					CAM_Pulse_Output(CAM_out_Phase,VIOS_VVT_Exh_Phase_Final,CAM_output_Port,CAM_output_PIN);
 					

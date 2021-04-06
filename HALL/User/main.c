@@ -93,8 +93,8 @@ uint16_t Debug_Crank_Freq_Display_Org;
 
 
 #define AD_MIN 0
-
-
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
+uint32_t Task_Stack_MaxSize;
 
 uint16_t Filter_index=0,Filter_SumValue,Filter_length=16,Filter_AD_Temp[16]={0},Filter_Delete;
 
@@ -130,7 +130,7 @@ void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
 	char LoopCnt,Filt_cnt,index_ii;
-	uint16_t CrankPeroid=720,AD_Offset_Value,freq_input;
+	uint16_t freq_input;
 	data = data;
 	
 
@@ -158,42 +158,21 @@ void Task1 (void *data)
 				LoopCnt=0;
 			VIOS_GPIO_LED_Test();
 			
-			Main_74HC165=VIOS_Read_HC165(3);
-
-			//vTaskDelay( 1 / portTICK_RATE_MS ); 
-				
+			Main_74HC165=VIOS_Read_HC165(3);		
 			VIOS_ADC_Convert_Result();
 
-		
-			if(ADC_SimpleConvertValue[1]>AD_MIN)
-			{
-				AD_Offset_Value=ADC_SimpleConvertValue[1]-AD_MIN;
-			}
-			else
-			{
-				AD_Offset_Value=0;
-			}
-	
-			Filter_AD_Temp[Filter_index]=AD_Offset_Value;
-			Filter_index++;
-			if(Filter_index>16)
-			{
-			Filter_index=0;
-			}
-			
-			Filter_SumValue=0;
-			for(Filt_cnt=0;Filt_cnt<16;Filt_cnt++)
-			{
-					Filter_SumValue=Filter_SumValue+Filter_AD_Temp[Filt_cnt];
-			}
-			freq_input=Filter_SumValue/16;
-			Debug_Crank_Freq_Display_Org=freq_input;
-			Debug_Crank_Freq_Display=freq_input*2;
-			VIOS_Set_Crank_Freq(Debug_Crank_Freq_Display);
-			CRANK_OutPut_Function(freq_input*2);
+//			freq_input=VIOS_Crank_Frequency;			
+//			Debug_Crank_Freq_Display_Org=freq_input;
+//			Debug_Crank_Freq_Display=freq_input;
+			VIOS_Set_Crank_Freq(VIOS_Crank_Frequency);
+			CRANK_OutPut_Function(VIOS_Crank_Frequency);
 			VSPD_Output_WSS(VIOS_VehSpd_WSS);
 			VSPD_Output_VSS(VIOS_VehSpd_VSS);
 
+			if(Task_Stack_MaxSize<xPortGetFreeHeapSize())
+			{
+					Task_Stack_MaxSize=xPortGetFreeHeapSize();
+			}
 
 		}
 		

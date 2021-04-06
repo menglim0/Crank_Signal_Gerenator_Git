@@ -1,8 +1,8 @@
 #include "CAM_Pulse.h"
 #include "My_InitTask.h"  
 
-#define CAM_out GPIOA
-#define CAM_out GPIO_Pin_0
+//#define CAM_out GPIOA
+//#define CAM_out GPIO_Pin_0
 
 
 //uint16_t CAM_out_Phase[]={10,20,30,40,50,60,70,80,90,100}; 

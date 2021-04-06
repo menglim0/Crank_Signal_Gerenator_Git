@@ -20,5 +20,4 @@
 void CRANK_Freq_DC(uint16_t freq);
 void CRANK_OutPut_Function(uint16_t freq);
 
-
 #endif

@@ -2,9 +2,11 @@
 #include "vios.h"
 #include "stdbool.h"
 
+#define ADC_Filter_Length 32
+#define ADC_Zero_Offset 90
 
-u16 ADC_SimpleConvertValue[9];
-
+uint32_t ADC_SimpleConvertValue[9];
+uint32_t ADC_TempConvertValue[9][ADC_Filter_Length];
 
 u8 VIOS_Misfire_Enable;
 u8 VIOS_Misfire_Cylinder;
@@ -24,17 +26,20 @@ u16 VIOS_Crank_Freq;
 
 
 /*----------75CH165 Def-------------------*/
-uint32_t  DA_75CH165[4],VIOS_VVT_In_Phase_Final,VIOS_VVT_Exh_Phase_Final;
+uint32_t  DA_75CH165[1],VIOS_VVT_In_Phase_Final,VIOS_VVT_Exh_Phase_Final;
 uint32_t Main_74HC165;
 
+uint32_t VIOS_Crank_Frequency;
 uint32_t VIOS_Misfire_Frequency;
 uint32_t VIOS_Knock_Frequency;
+
 uint8_t VIOS_Knock_EnableBit[4];
 uint8_t VIOS_Misfire_EnableBit[4];	
 uint32_t Misfire_EnableStatus;
 uint32_t Knock_EnableStatus;
 
 uint32_t VIOS_VehSpd_WSS,VIOS_VehSpd_VSS;
+uint8_t VIOS_ADC_Filter_Index=0;
 
 
 #define HC165_CLK_Set() GPIO_SetBits(GPIOB, GPIO_Pin_8)
@@ -62,29 +67,54 @@ AD0 not used
 AD1 Crank Freq=AD*2 max 8K
 AD2 Knock Frequency=AD*7 max 28K
 AD3 Misfire Ratio = Crank Freq *Value /4096
-AD4 WSS = Value *5 max 20K
-AD5 VSS = Value *5 max 20K
+AD4 WSS = Value *5 max 20K  Timer 0
+AD5 VSS = Value *5 max 20K  Timer 2
 -------------------*/
 void VIOS_ADC_Convert_Result()
 {
+	uint8_t ADC_Filter_Index,ADC_Ch_Index;
+	uint32_t ADC_ConvertValue_Sum=0;
 	
 	
 				//AD_ConvertFunction();
 				//ADC_SimpleConvertValue[0]=Get_Adc(ADC_Channel_0);
-				ADC_SimpleConvertValue[1]=Get_Adc(ADC_Channel_1);
-				ADC_SimpleConvertValue[2]=Get_Adc(ADC_Channel_2);
-				ADC_SimpleConvertValue[3]=Get_Adc(ADC_Channel_3);
-				ADC_SimpleConvertValue[4]=Get_Adc(ADC_Channel_4);
-				ADC_SimpleConvertValue[5]=Get_Adc(ADC_Channel_5);
-				ADC_SimpleConvertValue[6]=Get_Adc(ADC_Channel_6);
-				ADC_SimpleConvertValue[7]=Get_Adc(ADC_Channel_7);
-				ADC_SimpleConvertValue[8]=Get_Adc(ADC_Channel_8);
-				//VIOS_Misfire_Frequency=ADC_SimpleConvertValue[0]*2*(4096-2048)/4096;
+
+	for(ADC_Ch_Index=1;ADC_Ch_Index<9;ADC_Ch_Index++)
+	{
+			for(ADC_Filter_Index=0;ADC_Filter_Index<ADC_Filter_Length;ADC_Filter_Index++)
+			{
+				ADC_TempConvertValue[ADC_Ch_Index][ADC_Filter_Index]=Get_Adc(ADC_Ch_Index);
+				ADC_ConvertValue_Sum=ADC_ConvertValue_Sum+ADC_TempConvertValue[ADC_Ch_Index][ADC_Filter_Index];
+			}
+			ADC_ConvertValue_Sum=ADC_ConvertValue_Sum/ADC_Filter_Length;
+			ADC_SimpleConvertValue[ADC_Ch_Index]+=ADC_ConvertValue_Sum;
+			ADC_SimpleConvertValue[ADC_Ch_Index]=ADC_SimpleConvertValue[ADC_Ch_Index]/2;
 			
+			if(ADC_SimpleConvertValue[ADC_Ch_Index]>ADC_Zero_Offset)
+			{
+			ADC_SimpleConvertValue[ADC_Ch_Index]=ADC_SimpleConvertValue[ADC_Ch_Index]-ADC_Zero_Offset;
+			}
+			else
+			{
+				ADC_SimpleConvertValue[ADC_Ch_Index]=0;
+			}
+		
+	}
+	
+
+	VIOS_ADC_Filter_Index++;
+	if(VIOS_ADC_Filter_Index>=ADC_Filter_Length)
+	{
+			VIOS_ADC_Filter_Index=0;
+	}
+
+				VIOS_Crank_Frequency=ADC_SimpleConvertValue[1]*2;
 				VIOS_Knock_Frequency=ADC_SimpleConvertValue[2]*7;
 				VIOS_Misfire_Frequency=ADC_SimpleConvertValue[3];
 				VIOS_VehSpd_WSS=ADC_SimpleConvertValue[4]*5;
 				VIOS_VehSpd_VSS=ADC_SimpleConvertValue[5]*5;
+	
+	
 }
 
 
@@ -117,6 +147,7 @@ void VIOS_Set_Parameters()
 u8 VIOS_Set_Misfire_Cylinder(u8 cylinder)
 {
 			VIOS_Misfire_Cylinder=cylinder;
+	return VIOS_Misfire_Cylinder;
 	
 }
 
@@ -147,6 +178,7 @@ u8 VIOS_Get_Misfire_Enable()
 u16 VIOS_Set_Misfire_Freq(u16 Misfire_Freq)
 {
 			VIOS_Misfire_Freq=Misfire_Freq;
+		return VIOS_Misfire_Freq;
 	
 }
 
@@ -163,6 +195,7 @@ Interface to CRANK signals
 u16 VIOS_Set_Crank_Freq(u16 Crank_Freq)
 {
 			VIOS_Crank_Freq=Crank_Freq;
+		return VIOS_Crank_Freq;
 	
 }
 
@@ -276,6 +309,7 @@ KNOCK
 u8 VIOS_Set_KNOCK_Cylinder(u8 cylinder)
 {
 			VIOS_KNOCK_Cylinder=cylinder;
+	return VIOS_KNOCK_Cylinder;
 	
 }
 

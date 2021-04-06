@@ -8,8 +8,7 @@ bool Timer4_Enable_Flag;
 
 void CRANK_OutPut_Function(uint16_t freq)
 {
-	uint32_t CRANK_Misfire_Frequency;
-
+	
 			if(freq>10)
 			{
 				if(Timer4_Enable_Flag==false)
@@ -59,28 +58,37 @@ void CRANK_OutPut_Function(uint16_t freq)
 
 void CRANK_Freq_DC(uint16_t freq)
 {
-	uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
+	uint16_t arr_peroid,Var_psc=0,i;
 	
-	uint32_t arr_peroid_long,arr_peroid_long_temp,arr_temp;
+	uint32_t arr_peroid_long,arr_peroid_long_temp;
 	
-	arr_peroid_long = 72000000/(freq*6);
-	arr_peroid_long_temp=arr_peroid_long;
-	for(i=0;i<100;i++)
+	if(freq>0)
 	{
-		if(arr_peroid_long_temp>65535)
-		{
-			Var_psc++;
-			arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
+		TIM_Cmd(TIM4, ENABLE); 
+			arr_peroid_long = 72000000/(freq*6);
+			arr_peroid_long_temp=arr_peroid_long;
+			for(i=0;i<100;i++)
+			{
+				if(arr_peroid_long_temp>65535)
+				{
+					Var_psc++;
+					arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
+				}
+				else
+				{
+				break;
+				}
+			}
+			
+			arr_peroid_long	=arr_peroid_long/	(Var_psc+1);
+			arr_peroid = arr_peroid_long;	
+			
+				TIM4->ARR = arr_peroid;
+				TIM4->PSC =Var_psc;
 		}
-		else
-		{
-		break;
-		}
+	else
+	{
+		TIM_Cmd(TIM4, DISABLE); 
+	
 	}
-	
-	arr_peroid_long	=arr_peroid_long/	(Var_psc+1);
-	arr_peroid = arr_peroid_long;	
-	
-		TIM4->ARR = arr_peroid;
-		TIM4->PSC =Var_psc;
 }
