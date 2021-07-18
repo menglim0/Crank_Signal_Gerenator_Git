@@ -103,7 +103,7 @@ uint16_t Filter_index=0,Filter_SumValue,Filter_length=16,Filter_AD_Temp[16]={0},
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 int main( void )				 
-{
+hg{
 
 	My_InitTask();
 

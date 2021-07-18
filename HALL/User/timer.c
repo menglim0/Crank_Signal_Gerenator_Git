@@ -38,7 +38,7 @@ void TIM2_Int_Init(u16 arr,u16 psc)
     GPIO_InitTypeDef GPIO_InitStruct;
  
 		RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);	//使能定时器3时钟
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA | RCC_APB2Periph_AFIO, ENABLE);
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA| RCC_APB2Periph_AFIO, ENABLE);
  
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_0;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
@@ -46,8 +46,8 @@ void TIM2_Int_Init(u16 arr,u16 psc)
     GPIO_Init(GPIOA, &GPIO_InitStruct);
 	
 	//GPIO_PinRemapConfig(GPIO_Remap_SWJ_Disable, ENABLE);    //disable JTAG
- //GPIO_PinRemapConfig(GPIO_FullRemap_TIM2, ENABLE); 
-    //初始化TIM3
+// GPIO_PinRemapConfig(GPIO_FullRemap_TIM2, ENABLE); 
+    //初始化TIM2
 	TIM_TimeBaseInitStruct.TIM_Period = arr; //设置在下一个更新事件装入活动的自动重装载寄存器周期的值
 	TIM_TimeBaseInitStruct.TIM_Prescaler =psc; //设置用来作为TIMx时钟频率除数的预分频值 
 	TIM_TimeBaseInitStruct.TIM_ClockDivision = 0; //设置时钟分割:TDTS = Tck_tim
