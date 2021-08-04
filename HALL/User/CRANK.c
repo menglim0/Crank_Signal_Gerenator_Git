@@ -6,33 +6,27 @@
 
 bool Timer4_Enable_Flag;
 
-void CRANK_OutPut_Function(uint16_t freq)
+void CRANK_OutPut_Function(uint16_t Crank_Freq)
 {
 	
-			if(freq>10)
+	uint16_t temp_Crank_Freq;
+	
+	
+			if(Crank_Freq>10)
 			{
-				if(Timer4_Enable_Flag==false)
-				{
-					TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
-					TIM_Cmd(TIM4, ENABLE);
-					Timer4_Enable_Flag=true;
-				}
+					if(Timer4_Enable_Flag==false)
+					{
+						TIM_ITConfig(TIM4,TIM_IT_Update|TIM_IT_Trigger,ENABLE );
+						TIM_Cmd(TIM4, ENABLE);
+						Timer4_Enable_Flag=true;
+					}
 
-								
-//				if(VIOS_Misfire_EnableBit[MINT_Cyl_Num]==1)
-//				{
-//					CRANK_Misfire_Frequency=(uint32_t)(freq*VIOS_Misfire_Frequency)/4096;
-//					if(CRANK_Misfire_Frequency<10)
-//					{
-//						CRANK_Misfire_Frequency=10;
-//					}
-//					CRANK_Freq_DC(CRANK_Misfire_Frequency);
-//				}
-				else if(freq<8000)
-				{
-					//Time4 只触发中断，不做PWM out
-				CRANK_Freq_DC(freq);
-				}
+					if(Crank_Freq<8000)
+					{
+						//Time4 只触发中断，不做PWM out
+						temp_Crank_Freq=Crank_Freq;
+					CRANK_Freq_DC(temp_Crank_Freq);
+					}
 			
 
 			}
@@ -56,28 +50,29 @@ void CRANK_OutPut_Function(uint16_t freq)
 
 
 
-void CRANK_Freq_DC(uint16_t freq)
+void CRANK_Freq_DC(uint16_t CRK_freq)
 {
-	uint16_t arr_peroid,Var_psc=0,i;
+	uint32_t arr_peroid,Var_psc=0,i;
 	
-	uint32_t arr_peroid_long,arr_peroid_long_temp;
+	uint32_t arr_peroid_long=0,arr_peroid_long_temp;
 	
-	if(freq>0)
+	if(VIOS_Crank_Frequency>10)
 	{
-		TIM_Cmd(TIM4, ENABLE); 
-			arr_peroid_long = 72000000/(freq*6);
+		  TIM_Cmd(TIM4, ENABLE); 
+			arr_peroid_long = 72000000/(VIOS_Crank_Frequency*6);
 			arr_peroid_long_temp=arr_peroid_long;
+		
 			for(i=0;i<100;i++)
 			{
-				if(arr_peroid_long_temp>65535)
+				if(arr_peroid_long_temp>=65535)
 				{
 					Var_psc++;
 					arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
-				}
-				else
-				{
-				break;
-				}
+				 }
+				 else
+				 {
+				    break;
+				  }
 			}
 			
 			arr_peroid_long	=arr_peroid_long/	(Var_psc+1);
@@ -85,6 +80,8 @@ void CRANK_Freq_DC(uint16_t freq)
 			
 				TIM4->ARR = arr_peroid;
 				TIM4->PSC =Var_psc;
+
+//			PWM_Freq_DC(3,50,VIOS_Crank_Frequency*6);
 		}
 	else
 	{

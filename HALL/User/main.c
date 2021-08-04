@@ -103,7 +103,7 @@ uint16_t Filter_index=0,Filter_SumValue,Filter_length=16,Filter_AD_Temp[16]={0},
 /*-----------------------------------------------------------*/
 /*-----------------------------------------------------------*/
 int main( void )				 
-hg{
+{
 
 	My_InitTask();
 
@@ -129,7 +129,7 @@ hg{
 void Task1 (void *data)
 {
 	portTickType xLastExecutionTime;
-	char LoopCnt,Filt_cnt,index_ii;
+	char LoopCnt,Filt_cnt,index_ii=0;
 	uint16_t freq_input;
 	data = data;
 	
@@ -142,21 +142,21 @@ void Task1 (void *data)
 		 vTaskDelayUntil( &xLastExecutionTime, 2/ portTICK_RATE_MS );
 		LoopCnt++;
 		
-		if(Usart1_Receive_Complete==true)
-		{
-			for (index_ii=0;index_ii<Usart1_Rec_Cnt;index_ii++)
-			{
-					write_date[index_ii]=DMA_Rece_Buf[index_ii];
-			}
-				Flash_Write_16byte_with_Check(); //DMA接收串口数据缓冲区
+//		if(Usart1_Receive_Complete==true)
+//		{
+//			for (index_ii=0;index_ii<Usart1_Rec_Cnt;index_ii++)
+//			{
+//					write_date[index_ii]=DMA_Rece_Buf[index_ii];
+//			}
+//				Flash_Write_16byte_with_Check(); //DMA接收串口数据缓冲区
 
-				Usart1_Receive_Complete=false;
-		}
+//				Usart1_Receive_Complete=false;
+//		}
 		
 		if(LoopCnt>15)
 		{
 				LoopCnt=0;
-			VIOS_GPIO_LED_Test();
+//			VIOS_GPIO_LED_Test();
 			
 			Main_74HC165=VIOS_Read_HC165(3);		
 			VIOS_ADC_Convert_Result();
@@ -168,6 +168,7 @@ void Task1 (void *data)
 			CRANK_OutPut_Function(VIOS_Crank_Frequency);
 			VSPD_Output_WSS(VIOS_VehSpd_WSS);
 			VSPD_Output_VSS(VIOS_VehSpd_VSS);
+
 
 			if(Task_Stack_MaxSize<xPortGetFreeHeapSize())
 			{

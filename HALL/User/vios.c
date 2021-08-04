@@ -6,7 +6,7 @@
 #define ADC_Zero_Offset 90
 
 uint32_t ADC_SimpleConvertValue[9];
-uint32_t ADC_TempConvertValue[9][ADC_Filter_Length];
+uint32_t ADC_TempConvertValue[9][ADC_Filter_Length+1];
 
 u8 VIOS_Misfire_Enable;
 u8 VIOS_Misfire_Cylinder;

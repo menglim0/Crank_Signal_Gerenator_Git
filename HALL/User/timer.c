@@ -299,16 +299,16 @@ void TIM1_Int_Init(u16 arr,u16 psc)
 
 void PWM_Freq_DC(uint8_t ch,uint16_t dutycycle, uint16_t freq)
 {
-	uint16_t arr_peroid,compare_dutycycle,Var_psc=0,i;
+	uint32_t arr_peroid,compare_dutycycle,Var_psc=0,i;
 	
 	uint32_t arr_peroid_long,arr_peroid_long_temp;
-	if(freq>0)
+	if(freq>10)
 	{
 			arr_peroid_long = 72000000/(freq);
 			arr_peroid_long_temp=arr_peroid_long;
 			for(i=0;i<100;i++)
 			{
-				if(arr_peroid_long_temp>65535)
+				if(arr_peroid_long_temp>=65535)
 				{
 					Var_psc++;
 					arr_peroid_long_temp	=arr_peroid_long/(Var_psc+1);
@@ -353,17 +353,17 @@ void PWM_Freq_DC(uint8_t ch,uint16_t dutycycle, uint16_t freq)
 				TIM4->CCR1 = compare_dutycycle;
 				break;
 										
-				case 4:
-				 TIM5->ARR = arr_peroid-1;
-				TIM5->PSC =Var_psc;
-				TIM5->CCR2 = compare_dutycycle;
-				break;
-												
-				case 5:
-				 TIM8->ARR = arr_peroid-1;
-				TIM8->PSC =Var_psc;
-				TIM8->CCR2 = compare_dutycycle;
-				break;
+//				case 4:
+//				 TIM5->ARR = arr_peroid-1;
+//				TIM5->PSC =Var_psc;
+//				TIM5->CCR2 = compare_dutycycle;
+//				break;
+//												
+//				case 5:
+//				 TIM8->ARR = arr_peroid-1;
+//				TIM8->PSC =Var_psc;
+//				TIM8->CCR2 = compare_dutycycle;
+//				break;
 				
 				default:
 				break;

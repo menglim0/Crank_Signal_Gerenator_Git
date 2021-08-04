@@ -17,7 +17,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //用户根据自己的需要设置
-void CRANK_Freq_DC(uint16_t freq);
+void CRANK_Freq_DC(uint16_t CRK_freq);
 void CRANK_OutPut_Function(uint16_t freq);
 
 #endif
