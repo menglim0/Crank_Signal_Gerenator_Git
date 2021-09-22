@@ -16,7 +16,9 @@ void KNOCK_Output_Freq(uint16_t freq,bool enable)
 	else if(enable==0)
 	{
 			PWM_Freq_DC(0,0,freq);
-			//TIM_Cmd(TIM2, DISABLE); 
+		
+		GPIO_ResetBits(GPIOB,GPIO_Pin_13);
+			TIM_Cmd(TIM1, DISABLE); 
 	}
 			
 }

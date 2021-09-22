@@ -35,6 +35,9 @@ unsigned int AD_value_group[2];
 #define CAM_output_Port GPIOB
 #define CAM_output_PIN GPIO_Pin_12
 
+#define Toggle_Port GPIOD
+#define Toggle_PIN GPIO_Pin_12
+
 #define CAMIN_Port GPIOB
 #define CAMIN_PIN GPIO_Pin_11
 
@@ -78,8 +81,8 @@ void My_InitTask(void)
 	 	TIM2_Int_Init(6009,1000);	
 		TIM_SetCompare1(TIM2,800);         //设置占空比为1/3 
 		
-		TIM1_Int_Init(6009,1000);	
-		TIM_SetCompare1(TIM1,800);         //设置占空比为1/3
+		TIM1_Int_Init(10,10);	
+//		TIM_SetCompare1(TIM1,800);         //设置占空比为1/3
 	//Init_PWM(0x01F0);
 	printf("Start_OK");
 	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
@@ -447,12 +450,15 @@ void TIM4_IRQHandler(void)   //TIM3中断
 					
 					if(VIOS_Knock_EnableBit[MINT_Cyl_Num]==1 && MINT_Knock_WinGate<60&&(VIOS_Get_Crank_Freq(0)>200))
 					{
+						GPIO_SetBits(Toggle_Port,Toggle_PIN);
 						KNOCK_Output_Freq(VIOS_Knock_Frequency,1);				
 						MINT_Knock_WinGate++; 
+						
 					}
 					else
 					{
 						KNOCK_Output_Freq(VIOS_Knock_Frequency,0);	
+							GPIO_ResetBits(Toggle_Port,Toggle_PIN);
 											
 					}									
 					
