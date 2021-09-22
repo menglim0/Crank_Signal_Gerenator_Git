@@ -473,14 +473,14 @@ void TIM4_IRQHandler(void)   //TIM3ÖÐ¶Ï
 					
 					if((( timer4_It_Cnt>=348) && (timer4_It_Cnt<360)))
 					{
-						GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+						GPIO_SetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					else if((timer4_It_Cnt/3)%2==1)
 					{
-					GPIO_SetBits(Crank_out_Port, Crank_out_Pin);
+					GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
 					}
 					else
-					{GPIO_ResetBits(Crank_out_Port, Crank_out_Pin);
+					{GPIO_SetBits(Crank_out_Port, Crank_out_Pin);
 					}
 	
 					
