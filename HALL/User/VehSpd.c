@@ -16,7 +16,7 @@ if(freq>0)
 	else
 	{
 			PWM_Freq_DC(1,0,1);
-			TIM_Cmd(TIM1, DISABLE); 
+			TIM_Cmd(TIM2, DISABLE); 
 	}
 			
 }
