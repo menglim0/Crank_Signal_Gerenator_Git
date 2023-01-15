@@ -43,6 +43,10 @@
 .\project\main.o: .\Libraries\stm32f10x_it.h
 .\project\main.o: User\My_InitTask.h
 .\project\main.o: User\vios.h
+.\project\main.o: User\CRANK.h
+.\project\main.o: User\VEHSPD.h
+.\project\main.o: User\My_InitTask.h
+.\project\main.o: User\MISF.h
 .\project\main.o: User\usart.h
 .\project\main.o: User\FLEE.h
 .\project\main.o: User\timer.h

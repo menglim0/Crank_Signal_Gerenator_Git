@@ -24,10 +24,11 @@ Variables for CRANK signals
 ----------------------------------------------*/
 u16 VIOS_Crank_Freq;
 
+u8 VIOS_Delay_us(u8 delay);
 
 /*----------75CH165 Def-------------------*/
 uint32_t  DA_75CH165[1],VIOS_VVT_In_Phase_Final,VIOS_VVT_Exh_Phase_Final;
-uint32_t Main_74HC165;
+uint32_t Main_74HC165,temp_data;
 
 uint32_t VIOS_Crank_Frequency;
 uint32_t VIOS_Misfire_Frequency;
@@ -54,10 +55,15 @@ uint8_t VIOS_ADC_Filter_Index=0;
 void VIOS_GPIO_LED_Test()
 {
 
-				if(!GPIO_ReadOutputDataBit(GPIOG,GPIO_Pin_14))
-						GPIO_SetBits( GPIOG,GPIO_Pin_14);             //  点亮LED 
+				if(!GPIO_ReadOutputDataBit(GPIOB,GPIO_Pin_14))
+				{
+						GPIO_SetBits( GPIOB,GPIO_Pin_14);             //  点亮LED 
+	        GPIO_WriteBit(GPIOB,GPIO_Pin_3,Bit_SET); 				}
 				else
-					GPIO_ResetBits(GPIOG,GPIO_Pin_14);            //  熄灭LED
+				{
+					GPIO_WriteBit(GPIOB,GPIO_Pin_14,Bit_RESET);            //  熄灭LED
+	        GPIO_WriteBit(GPIOB,GPIO_Pin_3,Bit_RESET); 
+				}					
 }
 
 
@@ -211,28 +217,48 @@ uint32_t VIOS_Read_HC165(unsigned char Cascades_Num)
 {
  unsigned char i;    //临时变量
  uint32_t DATA1=0;	 //临时数据
+	uint32_t j;
 	
-	
-	HC165_CLK_Set(); 
-	HC165_SH_Set();	//启动 74HC165
 	HC165_SH_Clr();
+	VIOS_Delay_us(10);
+	HC165_SH_Set();	//启动 74HC165	
+  VIOS_Delay_us(10);
+	HC165_SH_Clr();
+	VIOS_Delay_us(10);
+	HC165_CLK_Set();
 //-------------------------------------------------//	
 
 	if(Cascades_Num<4)
 	{
-		for(i=0;i<Cascades_Num*8;i++)	//读8次数据
+			if(HC165_DS)		//数据高位在前
+			{		
+//				temp_data = 0x080000;//读取到电平数据
+				DATA1=0x01;
+				
+			}
+		for(i=0;i<Cascades_Num*8-1;i++)	//读8次数据
 		{
 			//低电平时读取数据 
-				
-			if(HC165_DS)		//数据高位在前
-				DATA1 |= 0x800000>>i;//读取到电平数据
-			
-			HC165_CLK_Clr();
+//			HC165_SH_Clr();
+			HC165_CLK_Clr();		
+			VIOS_Delay_us(5);
 			HC165_CLK_Set(); 	//数据移位
+			VIOS_Delay_us(5);
+			DATA1=DATA1<<1;
+			if(HC165_DS)		//数据高位在前
+			{		
+				DATA1 += 0x01;//读取到电平数据
+				
+			}
+
+	
 
 		}
+//				temp_data=DATA1+temp_data;
+		HC165_CLK_Clr();
+		HC165_SH_Clr();
 		DA_75CH165[0]=DATA1;			//读取到一个数据 并存储
-		HC165_SH_Clr();	 
+
 	}
 	
 VIOS_VVT_In_Phase_Final=VIOS_Read_VVT_In_Phase(0);
@@ -337,6 +363,13 @@ u8 VIOS_Get_KNOCK_Enable()
 {
 
 		return VIOS_KNOCK_Enable;
+}
+
+u8 VIOS_Delay_us(u8 delay)
+{
+	u8 j,delay_us;
+	delay_us=delay;
+		for(j=delay_us;j>0;j--){}
 }
 
 

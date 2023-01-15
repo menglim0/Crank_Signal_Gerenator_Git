@@ -30,9 +30,13 @@
 .\project\my_inittask.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\project\my_inittask.o: .\Libraries\inc\misc.h
 .\project\my_inittask.o: User\vios.h
+.\project\my_inittask.o: User\CRANK.h
+.\project\my_inittask.o: User\VEHSPD.h
+.\project\my_inittask.o: User\My_InitTask.h
+.\project\my_inittask.o: User\MISF.h
+.\project\my_inittask.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\project\my_inittask.o: User\CAM_Pulse.h
 .\project\my_inittask.o: User\usart.h
 .\project\my_inittask.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdio.h
-.\project\my_inittask.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\project\my_inittask.o: User\FLEE.h
 .\project\my_inittask.o: User\timer.h

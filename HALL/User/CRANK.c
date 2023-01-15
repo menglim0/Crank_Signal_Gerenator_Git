@@ -8,6 +8,7 @@ bool Timer4_Enable_Flag;
 
 void CRANK_OutPut_Function(uint16_t freq)
 {
+	freq=VIOS_Crank_Frequency;
 	
 			if(freq>10)
 			{
@@ -29,9 +30,9 @@ void CRANK_OutPut_Function(uint16_t freq)
 //					CRANK_Freq_DC(CRANK_Misfire_Frequency);
 //				}
 				else if(freq<8000)
-				{
+				{ 
 					//Time4 只触发中断，不做PWM out
-				CRANK_Freq_DC(freq);
+				CRANK_Freq_DC(VIOS_Crank_Frequency);
 				}
 			
 
@@ -56,16 +57,16 @@ void CRANK_OutPut_Function(uint16_t freq)
 
 
 
-void CRANK_Freq_DC(uint16_t freq)
+void CRANK_Freq_DC(uint16_t freq_Temp)
 {
 	uint16_t arr_peroid,Var_psc=0,i;
 	
 	uint32_t arr_peroid_long,arr_peroid_long_temp;
-	
-	if(freq>0)
+//	freq_Temp=VIOS_Crank_Frequency;
+	if(freq_Temp>0)
 	{
 		TIM_Cmd(TIM4, ENABLE); 
-			arr_peroid_long = 72000000/(freq*6);
+			arr_peroid_long = 72000000/(freq_Temp*6);
 			arr_peroid_long_temp=arr_peroid_long;
 			for(i=0;i<100;i++)
 			{

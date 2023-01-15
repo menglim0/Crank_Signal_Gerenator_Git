@@ -56,6 +56,7 @@ uint16_t Debug_Crank_Freq_Display;
 /**** stm32的初始化工作全部在这里完成  *****/
 void My_InitTask(void)
 {
+	
 	uint8_t Flash_Read_Buffer[32];
    /* Configure the system clocks */
   	RCC_Configuration();
@@ -67,7 +68,6 @@ void My_InitTask(void)
   /* Configure the GPIO ports */
   	GPIO_Configuration();
 		uart_init(115200);	 //串口初始化为115200
-	
 /* DMA configuration ------------------------------------------------------*/
   //DMA_Configuration();
   /* ADC configuration ------------------------------------------------------*/
@@ -84,9 +84,11 @@ void My_InitTask(void)
 		TIM1_Int_Init(10,10);	
 //		TIM_SetCompare1(TIM1,800);         //设置占空比为1/3
 	//Init_PWM(0x01F0);
-	printf("Start_OK");
-	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
-	Usart1_Send(Flash_Read_Buffer,32);
+//	printf("Start_OK");
+//	FLASH_Read(0x0800F800,Flash_Read_Buffer,32);
+//	Usart1_Send(Flash_Read_Buffer,32);
+	
+
 	//Flash_Write_16byte_with_Check();
 }
 
@@ -171,20 +173,20 @@ void GPIO_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;					//定义一个GPIO结构体变量
 
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA|RCC_APB2Periph_GPIOB|RCC_APB2Periph_GPIOD|RCC_APB2Periph_GPIOE| RCC_APB2Periph_GPIOG |RCC_APB2Periph_AFIO,ENABLE);	
 															//使能各个端口时钟，重要！！！
 	
-			GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_6|GPIO_Pin_7|GPIO_Pin_8; 			//配置LED D5端口挂接到13端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//普通推挽输出
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOA, &GPIO_InitStructure);				   	//将端口GPIOA进行初始化配置
 	
-				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10|GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13; 			//配置LED D5端口挂接到13端口
-  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_3|GPIO_Pin_4|GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10|GPIO_Pin_11|GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14; 			//配置LED D5端口挂接到13端口
+  	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//普通推挽输出
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_10MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOB进行初始化配置
 	
-					GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; 			//配置LED D5端口挂接到13端口
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOB进行初始化配置
@@ -192,20 +194,20 @@ void GPIO_Configuration(void)
 		/*  配置输入端口*/
 	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_7 ; 			//配置LED E0端口挂接到0端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;	   		//复用功能上拉输入
-  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_2MHz;	   	//配置端口速度为50M
+  	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOB, &GPIO_InitStructure);				   	//将端口GPIOE进行初始化配置
 	
-				GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 			//配置LED D5端口挂接到13端口
+		GPIO_InitStructure.GPIO_Pin = GPIO_Pin_3; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOD, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
 	
-	GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14;             //配置LED D2端口挂接到PG14端口
+	  GPIO_InitStructure.GPIO_Pin =  GPIO_Pin_14;             //配置LED D2端口挂接到PG14端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   	//通用输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOG, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
 
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 ; 			//配置LED D5端口挂接到13端口
+	  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_13 ; 			//配置LED D5端口挂接到13端口
   	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;	   		//复用功能输出推挽
   	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;	   	//配置端口速度为50M
   	GPIO_Init(GPIOD, &GPIO_InitStructure);				   	//将端口GPIOD进行初始化配置
