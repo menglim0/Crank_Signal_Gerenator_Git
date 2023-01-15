@@ -31,3 +31,8 @@
 .\project\cam_pulse.o: .\Libraries\inc\stm32f10x_wwdg.h
 .\project\cam_pulse.o: .\Libraries\inc\misc.h
 .\project\cam_pulse.o: User\vios.h
+.\project\cam_pulse.o: User\CRANK.h
+.\project\cam_pulse.o: User\VEHSPD.h
+.\project\cam_pulse.o: User\My_InitTask.h
+.\project\cam_pulse.o: User\MISF.h
+.\project\cam_pulse.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h

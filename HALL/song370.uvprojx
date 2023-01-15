@@ -525,6 +525,21 @@
               <FileType>1</FileType>
               <FilePath>.\User\timer.c</FilePath>
             </File>
+            <File>
+              <FileName>CRANK.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\CRANK.c</FilePath>
+            </File>
+            <File>
+              <FileName>KNOCK.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\KNOCK.c</FilePath>
+            </File>
+            <File>
+              <FileName>VehSpd.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\VehSpd.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>

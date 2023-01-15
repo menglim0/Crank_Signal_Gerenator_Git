@@ -25,6 +25,9 @@
 ".\project\usart.o"
 ".\project\flee.o"
 ".\project\timer.o"
+".\project\crank.o"
+".\project\knock.o"
+".\project\vehspd.o"
 --library_type=microlib --strict --scatter ".\Project\BrakeDetection.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers
